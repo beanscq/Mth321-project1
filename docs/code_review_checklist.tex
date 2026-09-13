@@ -1,0 +1,136 @@
+% ============================================================
+% Code-Review Checklist — Tutorial 3 (code walkthrough)
+% Compile: tectonic -X compile code_review_checklist.tex
+% ============================================================
+\documentclass[11pt]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+
+\setmainfont{Times New Roman}
+\newcommand{\e}[1]{{\emojifont #1}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\renewcommand{\arraystretch}{1.3}
+
+% Fill-in field: a thin box for handwritten input
+\newcommand{\fillbox}[1][3cm]{\framebox[#1]{\rule{0pt}{2.4ex}\rule{#1}{0pt}}}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries Code-Review Checklist}\\[0.4em]
+  {\large Code-quality check (intra-team review)}
+\end{center}
+\vspace{0.2em}
+\hrule
+\vspace{0.6em}
+
+During the intra-team review, each member reads the team's code and scores
+it against this checklist. It keeps the review honest and focused on
+correctness and clarity, not style.
+
+\textbf{Ground rule:} you are reviewing \emph{correctness and clarity}, not
+style taste. ``Not how I would write it'' is not a defect. ``I can't tell what
+it does'' is.
+
+\noindent
+\textbf{Reviewer:}~\fillbox[4cm] \quad
+\textbf{Code under review:}~\fillbox[4cm]
+
+% ============================================================
+\section*{A. Can it run?}
+% ============================================================
+\begin{itemize}[leftmargin=2.4em, itemsep=1pt]
+  \item[$\square$] \texttt{python code/run\_all.py} runs end-to-end without errors
+  \item[$\square$] README explains how to install deps and run
+\end{itemize}
+
+% ============================================================
+\section*{B. Is the model right?}
+% ============================================================
+\begin{itemize}[leftmargin=2.4em, itemsep=1pt]
+  \item[$\square$] The RHS $f(t, y)$ matches the report's equations (spot-check 2--3 terms)
+  \item[$\square$] Parameters are defined somewhere findable (constants block / config)
+  \item[$\square$] Units or scales are noted (e.g.\ stiffness ratio computed)
+\end{itemize}
+
+% ============================================================
+\section*{C. Are the methods correctly implemented?}
+% ============================================================
+\begin{itemize}[leftmargin=2.4em, itemsep=1pt]
+  \item[$\square$] Explicit Euler: $y + h f(t, y)$ --- one line, not accidentally implicit
+  \item[$\square$] RK4: all four stages use the correct arguments ($k_2$ uses $t+h/2$, etc.)
+  \item[$\square$] Implicit Euler: Newton solves $w - y_n - h f(t_{n+1}, w) = 0$, not a
+    simplified version
+  \item[$\square$] Newton Jacobian $J_F = I - h J_f$ (check sign!) matches the
+    finite-difference check in the report
+  \item[$\square$] No hard-coded step sizes where the code claims adaptivity
+  \item[$\square$] Adaptive controller estimates an error and \emph{uses} it to change $h$
+\end{itemize}
+
+% ============================================================
+\section*{D. Are the numbers believable?}
+% ============================================================
+\begin{itemize}[leftmargin=2.4em, itemsep=1pt]
+  \item[$\square$] There is a comparison against a reference (analytic or high-accuracy)
+  \item[$\square$] The observed order is consistent with the claim (slope on log-log)
+  \item[$\square$] Mass / energy / invariant conservation is checked where applicable
+  \item[$\square$] Any claim like ``stable'' is backed by a stability-region plot or an
+    experiment, not just an assertion
+\end{itemize}
+
+% ============================================================
+\section*{E. Is it maintainable?}
+% ============================================================
+\begin{itemize}[leftmargin=2.4em, itemsep=1pt]
+  \item[$\square$] Functions are small and named by what they do
+  \item[$\square$] $f(t, y)$ is swappable (the integrator doesn't know the model)
+  \item[$\square$] Magic numbers are named or commented
+  \item[$\square$] Comments explain \emph{why}, not just \emph{what}
+  \item[$\square$] No dead code (commented-out blocks, unused imports)
+\end{itemize}
+
+% ============================================================
+\section*{F. Findings}
+% ============================================================
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}p{0.8cm}p{3.2cm}p{3.2cm}p{3.2cm}p{3.5cm}@{}}
+\toprule
+\# & Severity (blocker / major / minor) & Location (file:line) & What's wrong & Suggested fix \\
+\midrule
+1 & & & & \\
+2 & & & & \\
+3 & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section*{G. Top 3 things to fix before Seminar 2}
+% ============================================================
+1.\ \fillbox[5cm] \quad 2.\ \fillbox[5cm] \quad 3.\ \fillbox[5cm]
+
+% ============================================================
+\section*{Reviewer instructions}
+% ============================================================
+\begin{itemize}[leftmargin=2em, itemsep=2pt]
+  \item \textbf{Blocker} = code doesn't run, or produces wrong results (must fix).
+  \item \textbf{Major} = a claim in the report is not supported by the code
+    (e.g.\ ``adaptive'' but fixed $h$; ``order 4'' but RK4 stages wrong).
+  \item \textbf{Minor} = clarity / maintainability (rename, comment, split function).
+  \item Fill in findings even if everything passes --- ``no findings'' means you
+    did not look carefully.
+  \item Give the reviewed team one actionable \emph{positive}: something they
+    did well that they should keep doing.
+\end{itemize}
+
+\end{document}

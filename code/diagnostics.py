@@ -1,12 +1,14 @@
 import numpy as np
 
 
+#质量守恒误差
 def mass_error(y):
     """Return |y1 + y2 + y3 - 1| at each output time."""
     y = np.asarray(y, dtype=float)
     return np.abs(np.sum(y, axis=1) - 1.0)
 
 
+#最小浓度
 def min_component(y):
     """Return the smallest concentration at each output time."""
     y = np.asarray(y, dtype=float)
