@@ -1,4 +1,4 @@
-# Robertson Problem（Topic ③）完整题目分析与 WorkBuddy 协作 Prompt
+# Robertson Problem（Topic ③）完整题目分析与 agent 协作 Prompt
 
 > 本文以两份课程文件为准：`Project 1 Brief`（全项目共同要求）与 `Problem Pack`（Topic ③ 的专门要求）。此前仅根据 Project Brief 所做的分析需要更新；本题并不是只要求一般性的 Robertson 数值实验，而是给出了**非常具体、可复现的 protocol 与报告问题**。
 
@@ -353,9 +353,9 @@ $$
 
 ---
 
-# Part D：可直接发给 WorkBuddy 的 Prompt
+# Part D：可直接发给 agent 的 Prompt
 
-将以下内容完整复制给 WorkBuddy。之后再告诉它“先做第 X 项”。
+将以下内容完整复制给 agent。之后再告诉它“先做第 X 项”。
 
 ```text
 我正在完成 Numerical Analysis of ODEs and PDEs 的 Project 1，选择 Topic ③：Chemical kinetics — Robertson problem。请作为我的协作助手，严格根据以下完整作业要求帮助我完成项目。不要把它简化成泛泛的 ODE 示例；必须同时保留化学动力学解释与数值分析验证。
@@ -473,7 +473,7 @@ E. 希望你协作时遵守的工作方式
 
 ---
 
-## 8. 建议你给 WorkBuddy 的第一条后续指令
+## 8. 建议你给 agent 的第一条后续指令
 
 在贴完上面的 prompt 后，可以继续发送：
 
