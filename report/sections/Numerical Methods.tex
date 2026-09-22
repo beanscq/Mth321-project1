@@ -1,0 +1,31 @@
+\section{Numerical Methods}
+\subsection{Explicit Euler}
+Explicit Euler is $y_{n+1}=y_n+h f(t_n,y_n)$. Taylor expansion gives local truncation error $O(h^2)$ and global error $O(h)$. It uses one right-hand-side evaluation per step. For $y'=\lambda y$,
+\[
+R_{EE}(z)=1+z,\qquad z=h\lambda,
+\]
+and the negative-real stability interval is $[-2,0]$.
+
+\subsection{Classical RK4}
+RK4 is
+\begin{align*}
+k_1&=f(t_n,y_n),&k_2&=f(t_n+h/2,y_n+hk_1/2),\\
+k_3&=f(t_n+h/2,y_n+hk_2/2),&k_4&=f(t_n+h,y_n+hk_3),\\
+y_{n+1}&=y_n+\frac h6(k_1+2k_2+2k_3+k_4).
+\end{align*}
+For smooth $f$, local and global errors are $O(h^5)$ and $O(h^4)$~\cite{butcher}; each step costs four right-hand-side evaluations. Applying the stages to the scalar test equation gives
+\[
+R_{RK4}(z)=1+z+\frac{z^2}{2}+\frac{z^3}{6}+\frac{z^4}{24}.
+\]
+Its real-axis stability interval is approximately $[-2.7853,0]$. Fourth-order accuracy does not imply unconditional stiff stability.
+
+\subsection{Implicit Euler and Newton iteration}
+Implicit Euler satisfies
+\[
+y_{n+1}=y_n+h f(t_{n+1},y_{n+1}),
+\]
+and is first order. Defining $G(u)=u-y_n-hf(t_{n+1},u)$, Newton computes
+\begin{align*}
+[I-hJ_f(t_{n+1},u^{(k)})]\Delta u^{(k)}&=-G(u^{(k)}),\\
+u^{(k+1)}&=u^{(k)}+\Delta u^{(k)}.
+\end{align*}
