@@ -1,0 +1,20 @@
+\section{Conclusions}
+\paragraph{1. Conservation cannot certify accuracy.} A nearly exact invariant can coexist with negative concentrations and enormous error. Conservation, non-negativity, full-state error, and endpoint error must be reported separately, while recognising $E_{end}\le E_{global}$.
+
+\paragraph{2. Frozen-Jacobian analysis predicts a useful scale, not an exact threshold.} The $5.895\times10^{-4}$ estimate and $5.4159\times10^{-4}$ largest stable tested EE step differ by about eight percent. This supports local linearisation as a guide, not a nonlinear proof.
+
+\paragraph{3. Greater stability did not imply lower measured cost.} In the tested accuracy range and nominal cost model, first-order IE was more expensive than EE at targets reached by both. This is not a universal statement about implicit methods.
+
+\paragraph{4. Tolerances can change algorithmic behaviour.} A loose Newton threshold can accept an explicit-like predictor, and an unscaled adaptive norm can allow physically invalid steps. Verified findings and proposed mixed-norm improvements must remain distinct.
+
+Subject to final reference-table confirmation,
+\[
+\boxed{y_2(40)=9.185535\times10^{-6}}.
+\]
+
+\begin{thebibliography}{9}
+\bibitem{robertson} H. H. Robertson, ``The solution of a set of reaction rate equations,'' in J. Walsh, ed., \emph{Numerical Analysis: An Introduction}, Academic Press, London, 1966, pp. 178--182.
+\bibitem{hairer} E. Hairer and G. Wanner, \emph{Solving Ordinary Differential Equations II: Stiff and Differential-Algebraic Problems}, 2nd revised ed., Springer Series in Computational Mathematics, vol. 14, Springer-Verlag, Berlin, 1996.
+\bibitem{butcher} J. C. Butcher, \emph{Numerical Methods for Ordinary Differential Equations}, 3rd ed., John Wiley \& Sons, 2016, doi:10.1002/9781119121534.
+\bibitem{scipy} SciPy Developers, ``\texttt{scipy.integrate.solve\_ivp},'' \emph{SciPy Reference Guide}, \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html}, accessed 22 September 2026.
+\end{thebibliography}
