@@ -1,0 +1,74 @@
+\section{Mathematical and Stability Analysis}
+\subsection{Full and reduced Jacobians}
+Differentiating~\eqref{eq:model} gives
+\[
+J(y)=\begin{pmatrix}
+-0.04&10^4y_3&10^4y_2\\
+0.04&-10^4y_3-6\times10^7y_2&-10^4y_2\\
+0&6\times10^7y_2&0
+\end{pmatrix}.
+\]
+For example, differentiating $-3\times10^7y_2^2$ gives $-6\times10^7y_2$. Since $y_3=1-y_1-y_2$, direct substitution into the first two equations gives
+\[
+J_{\rm red}=\begin{pmatrix}
+-0.04-10^4y_2&10^4(y_1+2y_2-1)\\
+0.04+10^4y_2&10^4(1-y_1-3y_2)-6\times10^7y_2
+\end{pmatrix}.
+\]
+Conservation implies $(1,1,1)^TJ=0$, a \emph{left} null-vector relation; it does not make $(1,1,1)^T$ a right eigenvector. The full Jacobian is singular and has a structural zero eigenvalue. The two eigenvalues of $J_{\rm red}$ coincide with the two nonzero modes tangent to the invariant plane.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F5_jacobian_spectrum.pdf}
+\caption{Jacobian spectrum along the reference trajectory. The two nonzero real negative modes form the slow and fast clocks; the third eigenvalue is structurally zero up to round-off. The dense early-time panel checks that a fixed output grid does not hide the transient.}
+\label{fig:spectrum}
+\end{figure}
+
+\subsection{Stiffness ratio}
+Using only the two nonzero eigenvalues,
+\[
+S(t)=\frac{\max_{\lambda_j\ne0}|\operatorname{Re}\lambda_j(t)|}
+{\min_{\lambda_j\ne0}|\operatorname{Re}\lambda_j(t)|}.
+\]
+Including the structural zero would make $S$ undefined. The exactly degenerate initial state is not interpreted; the plot begins at the first positive logarithmic time. Eigenvalues are evaluated along the same reference trajectory used for error measurement.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F6_stiffness_ratio.pdf}
+\caption{Stiffness ratio on logarithmic time. Check values are approximately $3.0\times10^3$ at $10^{-4}$, $5.4\times10^3$ at $10^{-2}$, and $1.58\times10^5$ at $40$.}
+\label{fig:ratio}
+\end{figure}
+
+\subsection{Absolute stability and frozen bounds}
+The absolute-stability region is $\{z:|R(z)|\le1\}$. For explicit Euler this is the disk $|1+z|\le1$; RK4 has a bounded quartic region; implicit Euler includes the left half-plane because $|1/(1-z)|\le1$ there.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F4_stability_regions.pdf}
+\caption{Absolute-stability regions with the actual Robertson spectrum $h\lambda(t)$ overlaid. Explicit regions are bounded; implicit Euler is A-stable. The overlay is a local frozen-Jacobian diagnostic.}
+\label{fig:regions}
+\end{figure}
+
+At $t=40$, $|\lambda_{\rm fast}|=3392.79$, hence
+\[
+h_{EE}\lesssim\frac2{3392.79}=5.895\times10^{-4},\qquad
+h_{RK4}\lesssim\frac{2.7853}{3392.79}=8.209\times10^{-4}.
+\]
+These are neither exact critical steps nor complete nonlinear stability theorems. The Jacobian varies and eigenvalues alone can be misleading for non-normal systems. Similarly, $40/h$ is a conditional cost estimate under the frozen bound, not an unconditional lower bound for every explicit solver.
+
+\subsection{Four diagnostics}
+Define
+\begin{align*}
+E_{mass}&=\max_{t\in\mathcal T}|y_1+y_2+y_3-1|,\\
+y_{min}&=\min_{i,t\in\mathcal T}y_i(t),\\
+E_{global}&=\max_{t\in\mathcal T}\|y_h(t)-y_{ref}(t)\|_\infty,\\
+E_{end}&=|y_{2,h}(40)-y_{2,ref}(40)|.
+\end{align*}
+They provide different information, but they are not completely logically independent. Since $40\in\mathcal T$,
+\[
+E_{end}\le E_{global}.
+\]
+Thus a full-state pass implies an endpoint pass under the same absolute threshold; the converse is false. Conservation does not imply positivity or accuracy.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F9_four_track_diagnostics.pdf}
+\caption{Four diagnostic tracks. Conservation remains near round-off even for useless trajectories. The explicit-Euler counterexample at $h=0.003$ has conservation defect about $1.1\times10^{-13}$ while the minimum concentration is about $-921.8$ and the error about $1.08\times10^{10}$.}
+\label{fig:diagnostics}
+\end{figure}
