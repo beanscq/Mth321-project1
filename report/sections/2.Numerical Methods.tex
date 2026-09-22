@@ -17,15 +17,4 @@ For smooth $f$, local and global errors are $O(h^5)$ and $O(h^4)$~\cite{butcher}
 \[
 R_{RK4}(z)=1+z+\frac{z^2}{2}+\frac{z^3}{6}+\frac{z^4}{24}.
 \]
-Its real-axis stability interval is approximately $[-2.7853,0]$. Fourth-order accuracy does not imply unconditional stiff stability.
-
-\subsection{Implicit Euler and Newton iteration}
-Implicit Euler satisfies
-\[
-y_{n+1}=y_n+h f(t_{n+1},y_{n+1}),
-\]
-and is first order. Defining $G(u)=u-y_n-hf(t_{n+1},u)$, Newton computes
-\begin{align*}
-[I-hJ_f(t_{n+1},u^{(k)})]\Delta u^{(k)}&=-G(u^{(k)}),\\
-u^{(k+1)}&=u^{(k)}+\Delta u^{(k)}.
-\end{align*}
+Restricting the RK4 stability function to the negative real axis, the stability condition is $|R_{RK4}(z)|\leq1$. Solving the corresponding boundary equation gives the left endpoint of the negative-real stability interval at approximately $z=-2.7853$, so the interval is approximately $[-2.7853,0]$. Fourth-order accuracy does not imply unconditional stiff stability.
