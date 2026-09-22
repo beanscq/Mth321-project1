@@ -1,0 +1,33 @@
+\section{Introduction and Physical Model}
+\subsection{Robertson reaction system}
+The Robertson problem is a standard stiff reaction-rate benchmark~\cite{robertson,hairer}. With $y=(y_1,y_2,y_3)^T=([A],[B],[C])^T$,
+\begin{align}
+y_1'&=-0.04y_1+10^4y_2y_3,\qquad
+y_2'=0.04y_1-10^4y_2y_3-3\times10^7y_2^2,\label{eq:model}\\
+y_3'&=3\times10^7y_2^2,
+\end{align}
+with $y(0)=(1,0,0)^T$ on $0\le t\le40$. The displayed ODE is authoritative: no additional factor of two is inserted in $3\times10^7y_2^2$. The variables are normalised concentrations of $A,B,C$.
+
+Adding the equations gives $(1,1,1)^Tf(y)=0$, hence
+\[
+y_1(t)+y_2(t)+y_3(t)=1.
+\]
+Species $B$ is a short-lived intermediate. The approved reference trajectory gives a peak $y_2\approx3.6487\times10^{-5}$ at $t\approx4.42\times10^{-3}$ and $y_2(40)=9.185535\times10^{-6}$, while $A$ and $C$ evolve over tens of seconds.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F2_reference_solution.pdf}
+\caption{Tight-tolerance reference trajectory. Panels separate the slow species, the small intermediate $B$, and the invariant defect. Logarithmic time resolves the early transient; the invariant remains near floating-point round-off.}
+\label{fig:reference}
+\end{figure}
+
+\subsection{Why the problem remains stiff after the visible transient}
+The early spike of $B$ and the fast decay mode are not identical concepts. Even when the $B$ curve looks slowly varying, the Jacobian can retain a large negative eigenvalue, forcing explicit methods to use a small step. Stiffness must therefore be quantified using eigenvalues and characteristic times $1/|\operatorname{Re}\lambda|$, rather than visual inspection of concentration curves.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F13_two_clocks.pdf}
+\caption{Concentrations and characteristic times. The slow chemistry determines the 40-second horizon, whereas the persistent fast clock restricts explicit steps. The clock ratio grows from about $1.7$ to $1.58\times10^5$.}
+\label{fig:clocks}
+\end{figure}
+
+\subsection{Research questions and structure}
+We ask: (i) how to obtain a trustworthy trajectory and endpoint; (ii) how stiffness restricts explicit and implicit methods; (iii) how work compares at matched accuracy; (iv) what conservation, positivity, full-state error, and endpoint error each establish; and (v) how Newton and adaptive tolerances affect reliability. Sections 2--6 follow the required sequence Methods $\to$ Stability $\to$ Reference $\to$ Experiments $\to$ Conclusions.
