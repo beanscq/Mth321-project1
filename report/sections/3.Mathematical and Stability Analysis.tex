@@ -1,6 +1,18 @@
+\subsection{Implicit Euler and Newton iteration}
+Implicit Euler satisfies
+\[
+y_{n+1}=y_n+h f(t_{n+1},y_{n+1}),
+\]
+and is first order. Defining $G(u)=u-y_n-hf(t_{n+1},u)$, Newton computes
+\begin{align*}
+[I-hJ_f(t_{n+1},u^{(k)})]\Delta u^{(k)}&=-G(u^{(k)}),\\
+u^{(k+1)}&=u^{(k)}+\Delta u^{(k)}.
+\end{align*}
+The stability function $R_{IE}(z)=1/(1-z)$ contains the left half-plane. The final code must state the predictor, residual and update norms, stopping condition, maximum iteration count, and failed-step policy. These implementation details are \pending{} until the final code is provided; the report will not invent them.
+
 \section{Mathematical and Stability Analysis}
 \subsection{Full and reduced Jacobians}
-Differentiating~\eqref{eq:model} gives
+Differentiating the full Robertson vector field gives
 \[
 J(y)=\begin{pmatrix}
 -0.04&10^4y_3&10^4y_2\\
@@ -19,7 +31,7 @@ Conservation implies $(1,1,1)^TJ=0$, a \emph{left} null-vector relation; it does
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{F5_jacobian_spectrum.pdf}
-\caption{Jacobian spectrum along the reference trajectory. The two nonzero real negative modes form the slow and fast clocks; the third eigenvalue is structurally zero up to round-off. The dense early-time panel checks that a fixed output grid does not hide the transient.}
+\caption{Jacobian spectrum along the reference trajectory. The two dynamically relevant modes develop widely separated decay rates, while the full Jacobian has a structural zero eigenvalue. A narrow early-time interval contains a complex-conjugate pair with small imaginary parts. The dense early-time panel reveals this feature, which may be missed by the fixed logarithmic output grid.}
 \label{fig:spectrum}
 \end{figure}
 
@@ -69,6 +81,6 @@ Thus a full-state pass implies an endpoint pass under the same absolute threshol
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{F9_four_track_diagnostics.pdf}
-\caption{Four diagnostic tracks. Conservation remains near round-off even for useless trajectories. The explicit-Euler counterexample at $h=0.003$ has conservation defect about $1.1\times10^{-13}$ while the minimum concentration is about $-921.8$ and the error about $1.08\times10^{10}$.}
+\caption{Four diagnostic tracks. Conservation alone cannot certify accuracy: the invariant remains useful for detecting implementation errors, although its near-exact preservation does not establish time-discretisation accuracy. The explicit-Euler counterexample at $h=0.003$ has conservation defect about $1.1\times10^{-13}$ while the minimum concentration is about $-921.8$ and the error about $1.08\times10^{10}$.}
 \label{fig:diagnostics}
 \end{figure}
