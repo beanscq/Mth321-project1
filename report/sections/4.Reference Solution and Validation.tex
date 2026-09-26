@@ -1,1 +1,19 @@
+\section{Reference Solution and Validation}
+The local analysis above supplies predictions that must be tested against a trustworthy numerical baseline. We therefore construct and cross-check a high-accuracy reference trajectory before using it to measure convergence, stability failures, and endpoint error.
+The common comparison grid contains $t=0$ and 200 logarithmically spaced output points from $10^{-8}$ to $40$, for 201 points in total. Internal steps are method-specific. The reference trajectory is computed with Radau using
+\[
+\mathrm{rtol}=10^{-10},\qquad
+\mathrm{atol}=(10^{-14},10^{-20},10^{-14}),
+\]
+and repeated after reducing both tolerances by a factor of 100:
+\[
+\mathrm{rtol}=10^{-12},\qquad
+\mathrm{atol}=(10^{-16},10^{-22},10^{-16}).
+\]
+It is also cross-checked against BDF and LSODA~\cite{scipy}. A Jacobian identity checks algebra but is not an independent proof of trajectory accuracy.
 
+The tolerance repetition gives $10.75875$ agreeing digits, while the BDF and LSODA comparisons give $10.70288$ and $10.98101$ digits, respectively. The largest componentwise difference among the reference comparisons is $2.088996\times10^{-12}$. The reference trajectory has maximum invariant defect $2.442491\times10^{-15}$, remains non-negative, and gives $y_{2,\max}=3.648707\times10^{-5}$ at $t=4.420102\times10^{-3}$. These agreements are strong numerical evidence, not mathematical proof. A final solver-by-solver endpoint table still requires the individual raw outputs. The reported endpoint is
+\[
+y_2(40)=9.185535\times10^{-6},
+\]
+subject to final confirmation of its supported significant digits.
