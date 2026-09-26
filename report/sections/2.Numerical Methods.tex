@@ -5,6 +5,7 @@ Explicit Euler is $y_{n+1}=y_n+h f(t_n,y_n)$. Taylor expansion gives local trunc
 R_{EE}(z)=1+z,\qquad z=h\lambda,
 \]
 and the negative-real stability interval is $[-2,0]$.
+Indeed, for $z\in\mathbb R_-$, the condition $|1+z|\leq1$ is equivalent to $-2\leq z\leq0$. This bounded interval means that a sufficiently large negative value of $h\lambda$ leaves the stability region, even if the step would otherwise appear adequate for resolving a slowly varying concentration. For Robertson, this is a local linearised restriction based on the Jacobian modes, not a theorem guaranteeing stability or instability of the full nonlinear trajectory.
 
 \subsection{Classical RK4}
 RK4 is
@@ -13,8 +14,20 @@ k_1&=f(t_n,y_n),&k_2&=f(t_n+h/2,y_n+hk_1/2),\\
 k_3&=f(t_n+h/2,y_n+hk_2/2),&k_4&=f(t_n+h,y_n+hk_3),\\
 y_{n+1}&=y_n+\frac h6(k_1+2k_2+2k_3+k_4).
 \end{align*}
-For smooth $f$, local and global errors are $O(h^5)$ and $O(h^4)$~\cite{butcher}; each step costs four right-hand-side evaluations. Applying the stages to the scalar test equation gives
+For smooth $f$, local and global errors are $O(h^5)$ and $O(h^4)$; each step costs four right-hand-side evaluations. Applying the stages to the scalar test equation gives
 \[
 R_{RK4}(z)=1+z+\frac{z^2}{2}+\frac{z^3}{6}+\frac{z^4}{24}.
 \]
-Restricting the RK4 stability function to the negative real axis, the stability condition is $|R_{RK4}(z)|\leq1$. Solving the corresponding boundary equation gives the left endpoint of the negative-real stability interval at approximately $z=-2.7853$, so the interval is approximately $[-2.7853,0]$. Fourth-order accuracy does not imply unconditional stiff stability.
+Restricting the RK4 stability function to the negative real axis, the stability condition is $|R_{RK4}(z)|\leq1$. Solving the corresponding boundary equation gives the left endpoint of the negative-real stability interval at approximately $z=-2.7853$, so the interval is approximately $[-2.7853,0]$. Fourth-order accuracy describes how discretisation error decreases in the asymptotic regime; it does not make the bounded absolute-stability region larger without limit. Consequently, Robertson's rapidly decaying mode can restrict $h$ even when RK4 is already highly accurate on the slower components. Accuracy order and absolute stability answer different questions.
+
+\subsection{Implicit Euler and Newton iteration}
+Implicit Euler satisfies
+\[
+y_{n+1}=y_n+h f(t_{n+1},y_{n+1}),
+\]
+and is first order. Defining $G(u)=u-y_n-hf(t_{n+1},u)$, Newton computes
+\begin{align*}
+[I-hJ_f(t_{n+1},u^{(k)})]\Delta u^{(k)}&=-G(u^{(k)}),\\
+u^{(k+1)}&=u^{(k)}+\Delta u^{(k)}.
+\end{align*}
+The stability function $R_{IE}(z)=1/(1-z)$ contains the left half-plane. Thus implicit Euler is A-stable for the linear test equation, but stability alone does not guarantee sufficient accuracy at a large time step. Its practical performance also depends on the accuracy of the nonlinear solve and the computational cost of Newton iteration. In the reported implementation, Newton iteration starts from the explicit-Euler predictor $u^{(0)}=y_n+hf(t_n,y_n)$, uses the infinity norm of the nonlinear residual as its stopping measure, and permits at most 50 iterations. The standard uniform-step experiments use a residual tolerance of $10^{-12}$. The precise failed-step policy and any additional update-based stopping test remain to be confirmed from the final implementation.
