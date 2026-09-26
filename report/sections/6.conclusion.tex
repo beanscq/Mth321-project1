@@ -5,7 +5,9 @@
 
 \paragraph{3. Greater stability did not imply lower cost under the nominal operation-count model.} In the tested accuracy range and under the equal-weight model $C=N_f+N_J+N_{\mathrm{solve}}$, first-order IE was more expensive than EE at targets reached by both. This conclusion is restricted to the numerical methods, error targets, tested range, and nominal cost model used in this project; it is not a universal statement about implicit methods.
 
-\paragraph{4. Tolerances can change algorithmic behaviour.} A loose Newton threshold can accept an explicit-like predictor, and an unscaled adaptive norm can allow physically invalid steps. Verified findings and proposed mixed-norm improvements must remain distinct.
+\paragraph{4. Tolerances can change algorithmic behaviour.} A loose Newton threshold can accept an explicit-like predictor, and an unscaled adaptive norm can allow physically invalid steps. In the reported adaptive experiments, component-scaled mixed control completed all four tolerance runs without negative concentrations, whereas absolute $L^\infty$ control produced one inaccurate negative solution and one early termination. This comparison is specific to the tested controller and tolerances.
+
+Taken together, these findings show that numerical reliability in stiff chemical kinetics cannot be assessed by a single diagnostic. Local stability, global accuracy, physical admissibility, nonlinear-solver accuracy, and computational cost address different aspects of a numerical method. A reliable assessment therefore requires these properties to be examined together, with conclusions restricted to the algorithms and experimental settings actually tested.
 
 Subject to final reference-table confirmation,
 \[
