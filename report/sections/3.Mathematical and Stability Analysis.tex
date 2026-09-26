@@ -1,15 +1,3 @@
-\subsection{Implicit Euler and Newton iteration}
-Implicit Euler satisfies
-\[
-y_{n+1}=y_n+h f(t_{n+1},y_{n+1}),
-\]
-and is first order. Defining $G(u)=u-y_n-hf(t_{n+1},u)$, Newton computes
-\begin{align*}
-[I-hJ_f(t_{n+1},u^{(k)})]\Delta u^{(k)}&=-G(u^{(k)}),\\
-u^{(k+1)}&=u^{(k)}+\Delta u^{(k)}.
-\end{align*}
-The stability function $R_{IE}(z)=1/(1-z)$ contains the left half-plane. The final code must state the predictor, residual and update norms, stopping condition, maximum iteration count, and failed-step policy. These implementation details are \pending{} until the final code is provided; the report will not invent them.
-
 \section{Mathematical and Stability Analysis}
 \subsection{Full and reduced Jacobians}
 Differentiating the full Robertson vector field gives
@@ -31,7 +19,7 @@ Conservation implies $(1,1,1)^TJ=0$, a \emph{left} null-vector relation; it does
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{F5_jacobian_spectrum.pdf}
-\caption{Jacobian spectrum along the reference trajectory. The two dynamically relevant modes develop widely separated decay rates, while the full Jacobian has a structural zero eigenvalue. A narrow early-time interval contains a complex-conjugate pair with small imaginary parts. The dense early-time panel reveals this feature, which may be missed by the fixed logarithmic output grid.}
+\caption{Jacobian spectrum along the reference trajectory. The two dynamically relevant modes develop widely separated decay rates, while the full Jacobian has a structural zero eigenvalue. A narrow early-time interval contains a complex-conjugate pair with small imaginary parts. The dense early-time panel reveals this feature, which may be missed by the fixed logarithmic output grid; the later separation of real parts supplies the local time-scale evidence for stiffness.}
 \label{fig:spectrum}
 \end{figure}
 
@@ -45,16 +33,16 @@ Including the structural zero would make $S$ undefined. The exactly degenerate i
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{F6_stiffness_ratio.pdf}
-\caption{Stiffness ratio on logarithmic time. Check values are approximately $3.0\times10^3$ at $10^{-4}$, $5.4\times10^3$ at $10^{-2}$, and $1.58\times10^5$ at $40$.}
+\caption{Stiffness ratio on logarithmic time. Check values are approximately $3.0\times10^3$ at $10^{-4}$, $5.4\times10^3$ at $10^{-2}$, and $1.58\times10^5$ at $40$. Its growth shows that the separation of decay time scales persists and strengthens after the visible early transient; it is evaluated only from the two nonzero modes.}
 \label{fig:ratio}
 \end{figure}
 
 \subsection{Absolute stability and frozen bounds}
-The absolute-stability region is $\{z:|R(z)|\le1\}$. For explicit Euler this is the disk $|1+z|\le1$; RK4 has a bounded quartic region; implicit Euler includes the left half-plane because $|1/(1-z)|\le1$ there.
+The absolute-stability region is $\{z:|R(z)|\le1\}$. For explicit Euler this is the disk $|1+z|\le1$; RK4 has a bounded quartic region; implicit Euler includes the left half-plane because $|1/(1-z)|\le1$ there. These statements concern the linear test equation. Along the nonlinear Robertson trajectory, the eigenvalues of a frozen Jacobian provide local values of $z=h\lambda(t)$ and therefore a diagnostic of where stability restrictions may arise.
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{F4_stability_regions.pdf}
-\caption{Absolute-stability regions with the actual Robertson spectrum $h\lambda(t)$ overlaid. Explicit regions are bounded; implicit Euler is A-stable. The overlay is a local frozen-Jacobian diagnostic.}
+\caption{Absolute-stability regions with the Robertson spectrum $h\lambda(t)$ overlaid. The bounded EE and RK4 regions expose a local step-size restriction from the fast mode, whereas implicit Euler contains the left half-plane. The overlay predicts a relevant scale but does not establish nonlinear stability, accuracy, or concentration non-negativity.}
 \label{fig:regions}
 \end{figure}
 
@@ -64,6 +52,8 @@ h_{EE}\lesssim\frac2{3392.79}=5.895\times10^{-4},\qquad
 h_{RK4}\lesssim\frac{2.7853}{3392.79}=8.209\times10^{-4}.
 \]
 These are neither exact critical steps nor complete nonlinear stability theorems. The Jacobian varies and eigenvalues alone can be misleading for non-normal systems. Similarly, $40/h$ is a conditional cost estimate under the frozen bound, not an unconditional lower bound for every explicit solver.
+
+It is therefore essential to keep three notions separate. \emph{Absolute stability} concerns the response of a numerical method to the linear test equation or, here, a locally frozen linearisation. \emph{Numerical accuracy} concerns error relative to the reference trajectory. \emph{Physical admissibility} concerns constraints such as non-negative concentrations. Satisfying one of these conditions does not imply the other two.
 
 \subsection{Four diagnostics}
 Define
