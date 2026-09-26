@@ -1,12 +1,12 @@
 \section{Introduction and Physical Model}
 \subsection{Robertson reaction system}
-The Robertson problem is a standard stiff reaction-rate benchmark~\cite{robertson,hairer}. With $y=(y_1,y_2,y_3)^T=([A],[B],[C])^T$,
+The Robertson problem is a standard stiff reaction-rate benchmark~\cite{robertson}. With $y=(y_1,y_2,y_3)^T=([A],[B],[C])^T$,
 \begin{align}
 y_1'&=-0.04y_1+10^4y_2y_3,\qquad
 y_2'=0.04y_1-10^4y_2y_3-3\times10^7y_2^2,\label{eq:model}\\
 y_3'&=3\times10^7y_2^2,
 \end{align}
-with $y(0)=(1,0,0)^T$ on $0\le t\le40$. The displayed ODE is authoritative: no additional factor of two is inserted in $3\times10^7y_2^2$. The variables are normalised concentrations of $A,B,C$.
+with $y(0)=(1,0,0)^T$ on $0\le t\le40$. The variables are normalised concentrations of $A,B,C$.
 
 Adding the equations gives $(1,1,1)^Tf(y)=0$, hence
 \[
@@ -30,4 +30,13 @@ The early spike of $B$ and the fast decay mode are not identical concepts. Even 
 \end{figure}
 
 \subsection{Research questions and structure}
-We ask: (i) how to obtain a trustworthy trajectory and endpoint; (ii) how stiffness restricts explicit and implicit methods; (iii) how work compares at matched accuracy; (iv) what conservation, positivity, full-state error, and endpoint error each establish; and (v) how Newton and adaptive tolerances affect reliability. Sections 2--6 follow the required sequence Methods $\to$ Stability $\to$ Reference $\to$ Experiments $\to$ Conclusions.
+We ask: (i) how to obtain a trustworthy trajectory and endpoint; (ii) how stiffness restricts explicit and implicit methods; (iii) how work compares at matched accuracy; (iv) what conservation, positivity, full-state error, and endpoint error each establish; and (v) how Newton and adaptive tolerances affect reliability. The remainder of this report introduces the numerical methods, develops the mathematical and stability analysis, establishes a validated reference solution, and presents numerical experiments before drawing the main conclusions.
+
+\subsection{Research scope and contributions}
+The numerical schemes used here are standard; neither the Robertson model, classical RK4, implicit Euler, Newton's method, nor component-scaled error control is presented as a new algorithm. The contribution is instead a problem-specific analysis of how these familiar ingredients behave when coupled to a strongly stiff chemical system. First, we examine predictor acceptance inside the implicit solve. A local expansion of the predictor residual is related to the observed number of Newton corrections and to trajectory error. This identifies a mechanism by which a loose nonlinear stopping tolerance can accept an explicit-Euler predictor without correction, so that an implementation described nominally as implicit may not realise its expected stability behaviour at every step.
+
+Second, reliability is assessed through several diagnostics rather than a single success criterion. Mass conservation, concentration non-negativity, full-state error, and the endpoint error in $y_2(40)$ are reported separately. The existing explicit-Euler counterexample shows that an invariant can remain near machine precision while the trajectory becomes negative and grossly inaccurate. This separates a useful implementation check from evidence of time-discretisation accuracy.
+
+Third, the adaptive study compares an unscaled absolute infinity norm with component-scaled mixed control. Because the Robertson concentrations occupy very different scales, an error that appears small in absolute terms can still be unacceptable for the intermediate species. The reported runs quantify how the norm changes acceptance behaviour, global error, and physical admissibility. These studies deepen the required stability, validation, and adaptivity tasks, but their conclusions remain limited to the algorithms and parameter ranges actually tested.
+
+The large separation of chemical time scales motivates the comparison of explicit and implicit time integrators. We therefore introduce their accuracy and linear-stability properties before applying trajectory-dependent Jacobian analysis to the Robertson system.
