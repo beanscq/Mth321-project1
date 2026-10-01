@@ -1,4 +1,6 @@
 \section{Mathematical and Stability Analysis}
+Time-discretisation accuracy has two complementary aspects. Consistency describes how the local truncation error decreases with $h$, while stability determines whether local perturbations remain controlled as they propagate through the integration. For the stiff Robertson system, both must be examined: a high-order explicit method may have a small local truncation error while still being restricted by its bounded absolute-stability region.
+
 \subsection{Full and reduced Jacobians}
 Differentiating the full Robertson vector field gives
 \[
@@ -11,10 +13,17 @@ J(y)=\begin{pmatrix}
 For example, differentiating $-3\times10^7y_2^2$ gives $-6\times10^7y_2$. Since $y_3=1-y_1-y_2$, direct substitution into the first two equations gives
 \[
 J_{\rm red}=\begin{pmatrix}
--0.04-10^4y_2&10^4(y_1+2y_2-1)\\
-0.04+10^4y_2&10^4(1-y_1-3y_2)-6\times10^7y_2
+-0.04-10^4y_2&10^4(1-y_1-2y_2)\\[2mm]
+0.04+10^4y_2&10^4(y_1+2y_2-1)-6\times10^7y_2
 \end{pmatrix}.
 \]
+For example,
+\[
+\frac{\partial}{\partial y_2}
+\left[10^4y_2(1-y_1-y_2)\right]
+=10^4(1-y_1-2y_2),
+\]
+which fixes the sign structure of the second column.
 Conservation implies $(1,1,1)^TJ=0$, a \emph{left} null-vector relation; it does not make $(1,1,1)^T$ a right eigenvector. The full Jacobian is singular and has a structural zero eigenvalue. The two eigenvalues of $J_{\rm red}$ coincide with the two nonzero modes tangent to the invariant plane.
 
 \begin{figure}[H]
@@ -74,3 +83,4 @@ Thus a full-state pass implies an endpoint pass under the same absolute threshol
 \caption{Four diagnostic tracks. Conservation alone cannot certify accuracy: the invariant remains useful for detecting implementation errors, although its near-exact preservation does not establish time-discretisation accuracy. The explicit-Euler counterexample at $h=0.003$ has conservation defect about $1.1\times10^{-13}$ while the minimum concentration is about $-921.8$ and the error about $1.08\times10^{10}$.}
 \label{fig:diagnostics}
 \end{figure}
+\noindent\textit{Interpretation note.} The $2.1\times10^{-12}$ line is a reference-solver cross-check difference, not a rigorous upper bound on the unknown true solution error. Consequently, values below this level should be interpreted cautiously rather than declared meaningless.
