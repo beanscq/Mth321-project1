@@ -7,6 +7,8 @@
 
 \paragraph{4. Tolerances can change algorithmic behaviour.} A loose Newton threshold can accept an explicit-like predictor, and an unscaled adaptive norm can allow physically invalid steps. In the reported adaptive experiments, component-scaled mixed control completed all four tolerance runs without negative concentrations, whereas absolute $L^\infty$ control produced one inaccurate negative solution and one early termination. This comparison is specific to the tested controller and tolerances.
 
+These conclusions answer the research questions posed in Section~1.3: the reference solution is supported by independent numerical checks; stiffness imposes a practical explicit-step restriction; matched-accuracy cost does not follow from stability alone; reliability requires multiple diagnostics; and nonlinear and adaptive tolerances can alter the realised numerical behaviour.
+
 Taken together, these findings show that numerical reliability in stiff chemical kinetics cannot be assessed by a single diagnostic. Local stability, global accuracy, physical admissibility, nonlinear-solver accuracy, and computational cost address different aspects of a numerical method. A reliable assessment therefore requires these properties to be examined together, with conclusions restricted to the algorithms and experimental settings actually tested.
 
 Subject to final reference-table confirmation,
