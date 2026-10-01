@@ -1,15 +1,11 @@
 \section{Conclusions}
-\paragraph{1. Conservation cannot certify accuracy.} A nearly exact invariant can coexist with negative concentrations and enormous error. Conservation, non-negativity, full-state error, and endpoint error must be reported separately, while recognising $E_{end}\le E_{global}$.
+\paragraph{1. Conservation alone does not certify accuracy.} The invariant can remain near machine precision while the trajectory becomes negative and inaccurate. The explicit-Euler counterexample therefore requires conservation, non-negativity, full-state error, and endpoint error to be assessed separately.
 
-\paragraph{2. Frozen-Jacobian analysis predicts a useful scale, not an exact threshold.} The $5.895\times10^{-4}$ estimate and $5.4159\times10^{-4}$ largest stable tested EE step differ by about eight percent. This supports local linearisation as a guide, not a nonlinear proof.
+\paragraph{2. Frozen-Jacobian analysis predicts the scale of explicit instability.} The estimate is local and the empirical sweep brackets the nonlinear transition. For EE, the $5.895\times10^{-4}$ estimate differs by about eight percent from the $5.4159\times10^{-4}$ largest stable tested step.
 
-\paragraph{3. Greater stability did not imply lower cost under the nominal operation-count model.} In the tested accuracy range and under the equal-weight model $C=N_f+N_J+N_{\mathrm{solve}}$, first-order IE was more expensive than EE at targets reached by both. This conclusion is restricted to the numerical methods, error targets, tested range, and nominal cost model used in this project; it is not a universal statement about implicit methods.
+\paragraph{3. Greater stability did not reduce matched-accuracy cost in the nominal model.} First-order IE requires more work than EE at every tested target reached by both methods. This result uses $C=N_f+N_J+N_{\mathrm{solve}}$ and remains subject to final verification of the operation counters.
 
-\paragraph{4. Tolerances can change algorithmic behaviour.} A loose Newton threshold can accept an explicit-like predictor, and an unscaled adaptive norm can allow physically invalid steps. In the reported adaptive experiments, component-scaled mixed control completed all four tolerance runs without negative concentrations, whereas absolute $L^\infty$ control produced one inaccurate negative solution and one early termination. This comparison is specific to the tested controller and tolerances.
-
-These conclusions answer the research questions posed in Section~1.3: the reference solution is supported by independent numerical checks; stiffness imposes a practical explicit-step restriction; matched-accuracy cost does not follow from stability alone; reliability requires multiple diagnostics; and nonlinear and adaptive tolerances can alter the realised numerical behaviour.
-
-Taken together, these findings show that numerical reliability in stiff chemical kinetics cannot be assessed by a single diagnostic. Local stability, global accuracy, physical admissibility, nonlinear-solver accuracy, and computational cost address different aspects of a numerical method. A reliable assessment therefore requires these properties to be examined together, with conclusions restricted to the algorithms and experimental settings actually tested.
+\paragraph{4. Solver tolerances change the realised numerical behaviour.} A loose Newton threshold can accept the explicit predictor, while an unscaled adaptive norm can admit physically invalid steps. Across the tested adaptive settings, mixed control completes all four runs without negative concentrations. Absolute $L^\infty$ control produces one inaccurate negative solution and one early termination. The accepted-state formula must still be checked in our final implementation.
 
 Subject to final reference-table confirmation,
 \[
