@@ -12,7 +12,7 @@ Adding the equations gives $(1,1,1)^Tf(y)=0$, hence
 \[
 y_1(t)+y_2(t)+y_3(t)=1.
 \]
-Species $B$ is a short-lived intermediate. The reference trajectory gives a peak $y_2\approx3.6487\times10^{-5}$ at $t\approx4.42\times10^{-3}$ and $y_2(40)=9.185535\times10^{-6}$, while $A$ and $C$ evolve over tens of seconds.
+Species $B$ is a short-lived intermediate. On the prescribed logarithmic output grid, the sampled maximum is $y_2\approx3.6487\times10^{-5}$ at $t\approx4.42\times10^{-3}\,\mathrm{s}$, while $y_2(40)=9.185535\times10^{-6}$ and $A$ and $C$ evolve over tens of seconds.
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{F2_reference_solution.pdf}
@@ -38,5 +38,24 @@ The numerical schemes used here are standard; neither the Robertson model, class
 Second, reliability is assessed through several diagnostics rather than a single success criterion. Mass conservation, concentration non-negativity, full-state error, and the endpoint error in $y_2(40)$ are reported separately. The existing explicit-Euler counterexample shows that an invariant can remain near machine precision while the trajectory becomes negative and grossly inaccurate. This separates a useful implementation check from evidence of time-discretisation accuracy.
 
 Third, the adaptive study compares an unscaled absolute infinity norm with component-scaled mixed control. Because the Robertson concentrations occupy very different scales, an error that appears small in absolute terms can still be unacceptable for the intermediate species. The reported runs quantify how the norm changes acceptance behaviour, global error, and physical admissibility. These studies deepen the required stability, validation, and adaptivity tasks, but their conclusions remain limited to the algorithms and parameter ranges actually tested.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Required analysis and problem-specific extensions. The extensions are additional investigations of standard methods, not claims of new algorithms.}
+\label{tab:extensions}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}p{0.34\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}@{}}
+\toprule
+Required element&Problem-specific extension&Numerical purpose\\
+\midrule
+Stability analysis&Frozen-Jacobian prediction combined with empirical step-size bracketing and separate tracking of negativity and divergence&Tests whether local linear stability predicts the relevant scale rather than an exact nonlinear boundary\\
+Implicit Euler&Predictor-acceptance and Newton-residual analysis&Shows how nonlinear stopping tolerance can change the realised update and expose explicit-like behaviour\\
+Convergence study&Pre-asymptotic interpretation using $E(h)=C_ph^p+C_{p+1}h^{p+1}+\cdots$&Explains why finite-range fitted slopes need not equal the formal order exactly\\
+Adaptive integration&Absolute-norm versus component-scaled error-control comparison&Tests whether an apparently acceptable local error can still fail to protect the small intermediate species\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Together, these extensions are intended not to replace the required methods, but to test where their usual theoretical guarantees and practical diagnostics can become misleading in a strongly stiff nonlinear system.
 
 The large separation of chemical time scales motivates the comparison of explicit and implicit time integrators. We therefore introduce their accuracy and linear-stability properties before applying trajectory-dependent Jacobian analysis to the Robertson system.
