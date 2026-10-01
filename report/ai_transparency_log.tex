@@ -1,0 +1,32 @@
+\section{AI Transparency Audit}
+AI was used to support explanations, drafting, code review, and consistency checks. All AI-generated mathematics, code suggestions, and numerical interpretations were checked by the team rather than accepted automatically. 
+
+\small
+\begin{longtable}{p{0.04\textwidth}p{0.26\textwidth}p{0.60\textwidth}}
+\caption{AI transparency log.}\label{tab:ai-audit}\\
+\toprule No.&Review item&Correction or action\\\midrule
+\endfirsthead
+\multicolumn{3}{l}{\tablename\ \thetable{} continued}\\
+\toprule No.&Review item&Correction or action\\\midrule
+\endhead
+1&Reduced Jacobian&Re-derived after eliminating $y_3$; the left-null-vector relation was clarified.\\
+2&Agreeing digits&The digit criterion and reference-solver tolerances must be stated explicitly.\\
+3&RK4 polynomial&Checked from the four RK4 stages and corrected where necessary.\\
+4&Eigenvalue sampling&Added a dense early-time check for the short complex-conjugate interval.\\
+5&Adaptive first step&Flagged the initial-step choice for confirmation against the final code.\\
+6&Inexact Newton&Required residual, error, and iteration data rather than a qualitative claim.\\
+7&Stability boundary&Distinguished the frozen-Jacobian estimate from the largest stable tested step.\\
+8&Newton tolerance&Corrected the predictor-acceptance threshold direction in Figure 11.\\
+9&Adaptive norm&Distinguished an absolute norm from component-scaled mixed control.\\
+10&Conservation&Corrected the claim that conservation alone establishes accuracy.\\
+11&Slide/table values&Flagged numerical values that must be traced to a common raw-data source.\\
+12&Report structure&Reorganised the material into model, methods, analysis, validation, experiments, and conclusions.\\
+13&README command&Flagged the run command and output paths for final repository checking.\\
+14&Adaptive table&Separated the $10^{-6}$ run reaching $t=40$ from the $10^{-4}$ early termination.\\
+15&Damped Newton&Retained only claims supported by the eventual solver implementation and tests.\\
+16&Jacobian checker&Flagged possible transposition and required checks away from the initial state.\\
+17&Method switch&Explained how a loose Newton tolerance can accept an explicit-like predictor.\\
+18&Cold-start caption&Flagged predictor wording for comparison with the final implementation.\\
+\bottomrule
+\end{longtable}
+\normalsize
