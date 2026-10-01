@@ -60,9 +60,9 @@ At $t=40$, $|\lambda_{\rm fast}|=3392.79$, hence
 h_{EE}\lesssim\frac2{3392.79}=5.895\times10^{-4},\qquad
 h_{RK4}\lesssim\frac{2.7853}{3392.79}=8.209\times10^{-4}.
 \]
-These are neither exact critical steps nor complete nonlinear stability theorems. The Jacobian varies and eigenvalues alone can be misleading for non-normal systems. Similarly, $40/h$ is a conditional cost estimate under the frozen bound, not an unconditional lower bound for every explicit solver.
+The frozen bounds estimate the scale of the explicit step restriction. Their accuracy depends on the varying Jacobian and on the local eigenvalue description of the nonlinear system. The corresponding value $40/h$ is therefore a step-count estimate under the frozen-Jacobian condition.
 
-It is therefore essential to keep three notions separate. \emph{Absolute stability} concerns the response of a numerical method to the linear test equation or, here, a locally frozen linearisation. \emph{Numerical accuracy} concerns error relative to the reference trajectory. \emph{Physical admissibility} concerns constraints such as non-negative concentrations. Satisfying one of these conditions does not imply the other two.
+The experiments evaluate absolute stability, numerical accuracy, and physical admissibility separately. Absolute stability concerns the linear test equation or a locally frozen linearisation, numerical accuracy concerns error relative to the reference trajectory, and physical admissibility includes non-negative concentrations. A method may remain stable while producing an inaccurate or negative solution.
 
 \subsection{Four diagnostics}
 Define
@@ -83,4 +83,4 @@ Thus a full-state pass implies an endpoint pass under the same absolute threshol
 \caption{Four diagnostic tracks. Conservation alone cannot certify accuracy: the invariant remains useful for detecting implementation errors, although its near-exact preservation does not establish time-discretisation accuracy. The explicit-Euler counterexample at $h=0.003$ has conservation defect about $1.1\times10^{-13}$ while the minimum concentration is about $-921.8$ and the error about $1.08\times10^{10}$.}
 \label{fig:diagnostics}
 \end{figure}
-\noindent\textit{Interpretation note.} The $2.1\times10^{-12}$ line is a reference-solver cross-check difference, not a rigorous upper bound on the unknown true solution error. Consequently, values below this level should be interpreted cautiously rather than declared meaningless.
+The $2.1\times10^{-12}$ line records the difference between numerical reference solvers. It measures cross-solver agreement rather than the unknown true solution error, so differences below this level are reported without assigning additional significant digits.
