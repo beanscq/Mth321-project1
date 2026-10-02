@@ -24,7 +24,28 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Show environment
+        run: |
+          python -V
+          python -c "import numpy, scipy, matplotlib; print('numpy', numpy.__version__, '| scipy', scipy.__version__, '| matplotlib', matplotlib.__version__)"
+          nproc || true
+          free -m || true
+
       - name: Run the test suite
-        run: pytest -q
+        run: |
+          set -o pipefail
+          pytest -q --tb=short 2>&1 | tee pytest_output.txt
         env:
           MPLBACKEND: Agg
+
+      # on failure this puts the pytest output into the run summary, so the
+      # reason is readable straight from the Actions page (and the API)
+      - name: Publish pytest output
+        if: always()
+        run: |
+          {
+            echo '### pytest output (last 250 lines)'
+            echo '```'
+            tail -250 pytest_output.txt 2>/dev/null || echo '(no output captured)'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
