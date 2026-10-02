@@ -1,0 +1,162 @@
+# ---------------------------------------------------------------------------
+# Robertson project -- single source of truth for every numeric setting.
+# Every number that appears in the report must be reproducible from this file.
+# ---------------------------------------------------------------------------
+
+problem:
+  t_span: [0.0, 40.0]
+  y0: [1.0, 0.0, 0.0]
+
+# --- comparison grid -------------------------------------------------------
+# The task requires t = 0 plus >= 200 logarithmically spaced output times in
+# [1e-8, 40].  Every method AND the reference are interpolated onto this grid
+# before any comparison is made.
+output_grid:
+  include_t0: true
+  n_log: 200
+  t_min: 1.0e-8
+  t_max: 40.0
+
+# --- tight reference -------------------------------------------------------
+reference:
+  primary_method: Radau
+  cross_check_methods: [BDF, LSODA]
+  tight:
+    rtol: 1.0e-10
+    atol: [1.0e-14, 1.0e-20, 1.0e-14]   # componentwise: y2 lives at 1e-5..1e-10
+  tighter:
+    rtol: 1.0e-12
+    atol: [1.0e-16, 1.0e-22, 1.0e-16]
+  # "retain only digits unchanged by the repeat": the reported reference
+  # precision is min over components/times of the digits shared by tight+tighter.
+  tolerance_reduction_factor: 100.0
+
+# --- spectral / stiffness analysis ----------------------------------------
+eigen:
+  # an eigenvalue is classified as the STRUCTURAL zero when
+  #   |Re lam| <= zero_eigenvalue_rtol * max_j |Re lam_j|
+  zero_eigenvalue_rtol: 1.0e-8
+  # independent confirmation: the left null vector must be (1,1,1)/sqrt(3)
+  zero_eigenvalue_cos_tol: 1.0e-10
+  # the ratio is meaningless at the exactly degenerate initial state t = 0
+  first_reported_t: 1.0e-8
+
+# --- absolute stability regions -------------------------------------------
+stability_region:
+  grid_n: 801
+  re_range: [-6.0, 2.0]
+  im_range: [-4.5, 4.5]
+  # actual h*lambda spectra are overlaid to show why explicit methods fail
+  overlay_h: [1.0e-3, 5.0e-4, 1.0e-4]
+
+# --- dense output ----------------------------------------------------------
+interpolation:
+  scheme: cubic_hermite
+  why: >-
+    Interpolation order must be >= method order.  Plain linear interpolation
+    has O(h^2) error and would cap the observed convergence order of RK4 at 2,
+    destroying the convergence study.
+
+# --- methods under study ---------------------------------------------------
+methods:
+  explicit_euler:
+    label: "Explicit Euler"
+    order: 1
+  rk4:
+    label: "RK4"
+    order: 4
+  implicit_euler:
+    label: "Implicit Euler"
+    order: 1
+    newton_tol: 1.0e-12       # absolute tolerance on ||G||_inf, not on ||dy||
+    newton_maxiter: 50
+
+# --- uniform-step experiment ----------------------------------------------
+uniform:
+  # at least four successively halved step sizes (protocol requirement).
+  # the coarsest two are deliberately ABOVE the frozen-Jacobian bound, so the
+  # stable / non-negative / accurate flags have something to disagree about.
+  h_levels: [1.0e-3, 5.0e-4, 2.5e-4, 1.25e-4, 6.25e-5]
+  t_end: 40.0
+  # the earliest log-spaced output points sit inside the first one or two
+  # steps, where interpolation carries all of the error; every error is
+  # therefore also reported on t >= t_cut_late
+  t_cut_late: 1.0e-3
+
+# --- empirical step sweep (tests the frozen-Jacobian estimate) ------------
+step_sweep:
+  h_min: 1.5e-4
+  h_max: 3.0e-3
+  n_points: 22
+  methods: [explicit_euler, rk4, implicit_euler]
+
+# --- status thresholds -----------------------------------------------------
+criteria:
+  accurate_tol: 1.0e-4         # |y_num - y_ref|_inf <= this  =>  "accurate"
+  nonneg_tol: 1.0e-12          # min_i y_i >= -this            =>  "non-negative"
+  divergence_bound: 1.0e+3     # max_i |y_i| > this            =>  "diverged"
+  # below this the measured error is the ORACLE's error, not the method's;
+  # such levels are excluded from every convergence-order fit
+  reference_error_floor: 1.0e-11
+
+# --- convergence-order fits ------------------------------------------------
+convergence:
+  error_key: error_late        # error_full / error_late / error_at_t40
+  error_key_secondary: error_full
+
+# --- cost model ------------------------------------------------------------
+cost:
+  # unit = one right-hand-side evaluation
+  weights: {rhs: 1.0, jac: 1.0, lu: 1.0}
+  sensitivity_weights: {rhs: 1.0, jac: 5.0, lu: 5.0}
+  counted: [rhs evaluations, Jacobian evaluations, linear solves (LU),
+            accepted steps, rejected steps]
+  not_counted:
+    - Python interpreter overhead and memory traffic of the driver loop
+    - the O(h^4) Hermite dense output (it reuses stored node derivatives)
+    - assembling the analytic Jacobian (it is exact, not finite differenced)
+    - setup, reference construction and I/O
+    - any parallelism; all timings are single-threaded
+
+# --- P3: four-track diagnostics -------------------------------------------
+# F9 reuses the step-sweep rows: they already carry all four diagnostics in
+# separate columns (mass defect / min component / full-state error / y2(40)).
+diagnostics:
+  source: step_sweep
+
+# --- P3: terminal value y2(40) from the implicit method -------------------
+endpoint:
+  # the brief asks for y2(40) "at several tolerances"; we vary BOTH the step
+  # size and the Newton stopping tolerance, because they are different knobs
+  step_sizes: [1.0e-03, 2.5e-04, 6.25e-05]
+  newton_tols: [1.0e-08, 1.0e-12]
+
+# --- P3: Newton stopping-tolerance sweep ----------------------------------
+newton_sweep:
+  h: 1.0e-03
+  tol_levels: [1.0e-02, 1.0e-04, 1.0e-06, 1.0e-08, 1.0e-10, 1.0e-12, 1.0e-14]
+  maxiter: 50
+  # a tolerance is acceptable when the algebraic error inflates the total
+  # error by no more than this factor
+  max_inflation: 1.01
+
+# --- P3: adaptive step-size control (RK4 step doubling) -------------------
+adaptive:
+  base: rk4
+  tol_levels: [1.0e-04, 1.0e-06, 1.0e-08, 1.0e-10]
+  # the control experiment: the plain absolute infinity norm, which cannot see
+  # the stiff mode (y2 = O(1e-5)) and therefore fails.  Reported, not hidden.
+  control_tol_levels: [1.0e-04, 1.0e-06]
+  h0: 1.0e-06
+  safety: 0.9
+  facmax: 5.0
+  facmin: 0.2
+  h_min: 1.0e-12
+  h_max: 5.0e-02
+  max_steps: 3000000
+  atol_ratio: [1.0e-10, 1.0e-13, 1.0e-10]
+
+# --- plotting --------------------------------------------------------------
+figures:
+  dpi: 160
+  formats: [png, pdf]
