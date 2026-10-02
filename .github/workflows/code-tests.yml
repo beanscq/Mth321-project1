@@ -34,9 +34,22 @@ jobs:
       - name: Run the test suite
         run: |
           set -o pipefail
-          pytest -q --tb=short 2>&1 | tee pytest_output.txt
+          pytest -q --tb=line -rf 2>&1 | tee pytest_output.txt
         env:
           MPLBACKEND: Agg
+
+      # re-emit the failing tests as workflow annotations: they appear on the
+      # Actions page and are readable through the check-runs API
+      - name: Annotate failing tests
+        if: always()
+        run: |
+          if [ -s pytest_output.txt ]; then
+            grep -E "^(FAILED|ERROR)" pytest_output.txt | head -10 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+          else
+            echo "::error::pytest produced no output at all"
+          fi
 
       # on failure this puts the pytest output into the run summary, so the
       # reason is readable straight from the Actions page (and the API)
