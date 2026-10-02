@@ -1,0 +1,15 @@
+# demo.py 跑出来的图，属于生成物，不入库
+results/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store

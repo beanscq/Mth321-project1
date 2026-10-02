@@ -1,5 +1,4 @@
-numpy==2.5.3
-scipy==1.18.1
-matplotlib==3.11.1
-PyYAML==6.0.3
-pytest==8.3.4
+# 数值核心依赖。demo.py 只用得到这三个包。
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8

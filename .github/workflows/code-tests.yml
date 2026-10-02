@@ -1,16 +1,16 @@
-name: code tests
+name: code demo
 
 on:
   push:
   pull_request:
 
-# the numerical code lives in code/; run every step from there
+# the numerical code lives in code/; run everything from there
 defaults:
   run:
     working-directory: code
 
 jobs:
-  pytest:
+  demo:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,37 +28,21 @@ jobs:
         run: |
           python -V
           python -c "import numpy, scipy, matplotlib; print('numpy', numpy.__version__, '| scipy', scipy.__version__, '| matplotlib', matplotlib.__version__)"
-          nproc || true
-          free -m || true
 
-      - name: Run the test suite
-        run: |
-          set -o pipefail
-          pytest -q --tb=line -rf 2>&1 | tee pytest_output.txt
+      # run the whole numerical study end to end: model self-checks, spectrum,
+      # stability limit (swept + bisected), convergence orders, four-track
+      # diagnostics, the conservation counter-example, and the endpoint value
+      - name: Run the numerical demo
+        run: python demo.py --quick
         env:
           MPLBACKEND: Agg
 
-      # re-emit the failing tests as workflow annotations: they appear on the
-      # Actions page and are readable through the check-runs API
-      - name: Annotate failing tests
+      # keep the two figures the run produces, so the result is inspectable
+      # straight from the Actions page
+      - name: Upload the generated figures
         if: always()
-        run: |
-          if [ -s pytest_output.txt ]; then
-            grep -E "^(FAILED|ERROR)" pytest_output.txt | head -10 | while IFS= read -r line; do
-              echo "::error::$line"
-            done
-          else
-            echo "::error::pytest produced no output at all"
-          fi
-
-      # on failure this puts the pytest output into the run summary, so the
-      # reason is readable straight from the Actions page (and the API)
-      - name: Publish pytest output
-        if: always()
-        run: |
-          {
-            echo '### pytest output (last 250 lines)'
-            echo '```'
-            tail -250 pytest_output.txt 2>/dev/null || echo '(no output captured)'
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+        uses: actions/upload-artifact@v4
+        with:
+          name: figures
+          path: code/results/
+          if-no-files-found: ignore
