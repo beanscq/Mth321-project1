@@ -170,7 +170,7 @@ Compare one full RK4 step with two half steps,
 \[
 e=y_{fine}-y_{whole}.
 \]
-For order four, the Richardson estimate $e/(2^4-1)=e/15$ approximates the local error of the coarser (full) step, and the implementation accepts the \emph{half-step} result $y_{\rm half}$, which is $16\times$ more accurate than the estimate suggests; the controller is therefore conservative by construction. The step is accepted when the scaled error indicator is at most $\mathrm{tol}$, and the next trial step is
+For order four, the Richardson estimate $e/(2^4-1)=e/15$ approximates the local error of the coarser (full) step, and the implementation accepts the two-half-step result $y_{\rm fine}$, which is more accurate than the full-step result. The step is accepted when the scaled error indicator is at most $\mathrm{tol}$, and the next trial step is
 \[
 h_{\rm new}=h\cdot\mathrm{clip}\!\left(0.9\,(\mathrm{tol}/\eta)^{1/5},\,0.2,\,5\right),
 \]
@@ -243,6 +243,70 @@ Stability controls much of the step selection in the successful mixed-norm runs.
 
 Local acceptance under the absolute norm coexists with large global error, negative concentrations, or early termination in these runs. Component-scaled control avoids these failures over the same tested settings. Efficiency is assessed separately from admissibility and accuracy.
 
+\subsection{Stability-aware adaptive RK4}
+\label{sec:stability-aware-rk4}
+The mixed-norm adaptive RK4 controller selects the next step from a local truncation-error estimate, but it does not explicitly impose the RK4 stability restriction. Section~\ref{sec:frozen-bounds} showed that the relevant stability scale changes along the Robertson trajectory. We therefore tested a problem-specific stability-aware variant in which the error-based step proposal is capped using the local reduced-Jacobian spectrum.
+
+The original error controller proposes
+\[
+H_{\rm error}
+=H\,\operatorname{clip}\!\left(
+0.9\left(\frac{\mathrm{tol}}{\eta}\right)^{1/5},,0.2,,5
+\right).
+\]
+Let $\lambda_1(y)$ and $\lambda_2(y)$ be the two eigenvalues of $J_{\rm red}(y)$, and let
+\[
+R(z)=1+z+\frac{z^2}{2}+\frac{z^3}{6}+\frac{z^4}{24}
+\]
+be the classical RK4 stability polynomial. Step doubling advances an outer interval $H$ through two RK4 substeps of length $H/2$. The local boundary $H_{\rm stab}$ is therefore defined numerically by
+\[
+\max_{j=1,2}\left|R\!\left(\frac{H_{\rm stab}}{2}\lambda_j(y)\right)\right|=1.
+\]
+A one-dimensional bracket and bisection search computes this boundary, including the short interval in which the eigenvalues form a complex-conjugate pair. The stability-aware proposal is
+\[
+H_{\rm new}=\min\!\left(H_{\rm error},,0.9H_{\rm stab},,H_{\max}\right).
+\]
+The factor $0.9$ is the stability safety factor. The mixed error norm and all error-controller parameters remain unchanged. The cap is based on a frozen reduced-Jacobian spectrum and is therefore a local linear stability rule rather than a nonlinear stability guarantee.
+
+Three checks were used to validate the implementation. The reduced Jacobian was compared with centred finite differences; the bisection result for $H_{\rm stab}$ was checked against the classical RK4 stability boundary; and every accepted stability-aware step satisfied $H/H_{\rm stab}\leq0.9$. All three tests passed.
+
+For a matched comparison, both controllers were rerun in the same standalone implementation with identical settings: Richardson divisor $15$, accepted state $y_{\rm fine}$, error safety factor $0.9$, exponent $1/5$, growth and shrink limits $5$ and $0.2$, $H_{\min}=10^{-12}$, $H_{\max}=5\times10^{-2}$, initial step $H_0=10^{-6}$, and $\mathrm{atol\_ratio}=(10^{-10},10^{-13},10^{-10})$. The standard mixed controller frequently accepted outer steps beyond the local RK4 stability scale at the three looser tolerances. The numbers satisfying $H/H_{\rm stab}>1$ were $6459$ at $10^{-8}$, $8524$ at $10^{-6}$, and $8666$ at $10^{-4}$. The largest ratios were approximately $2.00$, $2.00$, and $2.06$, respectively.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Matched comparison of the standard mixed controller and its stability-aware variant. The eigenvalue count records the additional reduced-Jacobian spectral evaluations used by the capped controller.}
+\label{tab:stability-aware-rk4}
+\begin{tabular}{crrrrrrr}
+\toprule
+Tolerance&\multicolumn{2}{c}{Rejected trials}&\multicolumn{2}{c}{RHS calls}&RHS reduction&Cap active&Extra eig. evals\\
+&Standard&Capped&Standard&Capped&&&\\
+\midrule
+$10^{-10}$&1&1&375156&375156&$0.00\%$&$0.365\%$&62524\\
+$10^{-8}$&8309&0&364380&276552&$24.10\%$&$91.087\%$&46091\\
+$10^{-6}$&9354&0&361416&273960&$24.20\%$&$99.847\%$&45659\\
+$10^{-4}$&8444&0&349536&273768&$21.68\%$&$99.921\%$&45627\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The stability cap was active on only $0.365\%$ of accepted steps at $10^{-10}$. The active fractions increased to $91.087\%$, $99.847\%$, and $99.921\%$ at tolerances $10^{-8}$, $10^{-6}$, and $10^{-4}$, respectively. At the strictest tolerance, error control already kept almost all steps below the local stability limit. At the three looser tolerances, stability rather than local accuracy became the dominant step-size restriction.
+
+At the three looser tolerances, the capped controller reduced rejected trials from $8309$, $9354$, and $8444$ to zero. Relative to the standard mixed controller, total RHS work decreased by $24.10\%$ at $10^{-8}$, $24.20\%$ at $10^{-6}$, and $21.68\%$ at $10^{-4}$. The stability-aware runs used approximately $4.5\%$--$10.3\%$ more accepted steps, but each rejected step-doubling trial costs 12 RHS evaluations. Removing the rejection cycles therefore outweighed the increase in accepted steps.
+
+Both controllers retained non-negative concentrations in these mixed-norm runs. The experiment therefore provides no evidence that the stability cap improves positivity.
+
+At $10^{-10}$, the stability cap produced no practical improvement in the solution, accepted-step count, or RHS work. It nevertheless required $62524$ additional $2\times2$ reduced-Jacobian eigenvalue evaluations. The cap acts mainly as additional overhead when local-error control is already more restrictive than the stability condition. At the three looser tolerances, the stability-aware runs required approximately $4.56\times10^4$--$4.61\times10^4$ additional reduced-Jacobian eigenvalue evaluations. The measured improvement is therefore an RHS-work improvement. A wall-clock advantage is not claimed because the additional spectral calculations have not been incorporated into a controlled timing comparison.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{F17_stability_aware_adaptive_rk4.pdf}
+\caption{Stability-aware adaptive RK4. Left: outer-step histories at tolerance $10^{-6}$, comparing the standard mixed controller, the stability-aware variant, and the local cap $0.9H_{\rm stab}$. Right: work--precision comparison using RHS evaluations. The cap has negligible effect at $10^{-10}$, but reduces RHS work at the three looser tolerances by eliminating rejected step-doubling trials. Reduced-Jacobian eigenvalue evaluations are additional work and are not included in the RHS count.}
+\label{fig:stability-aware-rk4}
+\end{figure}
+
+These results show that the usefulness of the stability cap depends on which mechanism limits the adaptive step. At $10^{-10}$, the local error criterion is already more restrictive, so the spectral cap adds computational work without changing the trajectory. At $10^{-8}$--$10^{-4}$, the error controller repeatedly proposes outer steps beyond the local RK4 stability scale. The cap prevents these proposals before the expensive step-doubling trial is attempted, removing the rejection cycles and reducing the total number of RHS evaluations. The extension therefore turns the frozen-Jacobian stability analysis from a diagnostic into an active step-size rule.
+
 \subsection{Library-solver benchmark}
 The six \texttt{solve\_ivp} solvers were benchmarked under a common tolerance setting. RK45, RK23, and DOP853 represent explicit non-stiff methods, Radau and BDF represent stiff methods, and LSODA switches automatically between regimes. The primary performance metric is the number of right-hand-side evaluations (\texttt{nfev}), which is deterministic for five of the six solvers; wall time is machine-dependent and reported for context only. All six runs use $\mathrm{rtol}=10^{-6}$, $\mathrm{atol}=(10^{-10},10^{-12},10^{-10})$, no user Jacobian, and the same integration span; every solver reaches $t=40$ successfully. Since the stiff solvers build their own internal Jacobians, \texttt{nfev} alone understates their total work slightly; \texttt{njev}/\texttt{nlu} are not part of the recorded benchmark output, and this metric remains separate from the nominal operation counts in Section~5.3.
 
@@ -310,5 +374,4 @@ The Newton and adaptive conclusions use the tested tolerances and controller set
 
 The convergence study uses cubic-Hermite interpolation on the common grid. No direct-grid or refined-output experiment isolates its contribution, so interpolation remains a secondary error source in the observed slopes.
 
-Two extensions would strengthen the work but are left as future work: a fixed-versus-adaptive comparison at matched global error, which would complete the work--precision picture of Section~5.5, and a stability-aware adaptive RK4 whose controller respects the frozen-Jacobian bound, which would turn the diagnostic of Section~3.3 into a design rule.
-
+A fixed-versus-adaptive comparison at matched global error would complete the work--precision picture of Section~5.5 and is left as future work. The stability-aware RK4 experiment uses the frozen reduced-Jacobian spectrum as a local step-size restriction. This remains a local linear criterion rather than a nonlinear stability guarantee. The reported efficiency improvement is measured in RHS evaluations; the additional reduced-Jacobian eigenvalue calculations have not been converted into a controlled wall-clock comparison.
