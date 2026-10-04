@@ -1,12 +1,3 @@
-\section{Numerical Methods}
-\subsection{Explicit Euler}
-Explicit Euler is $y_{n+1}=y_n+h f(t_n,y_n)$. Taylor expansion gives local truncation error $O(h^2)$ and global error $O(h)$. It uses one right-hand-side evaluation per step. For $y'=\lambda y$,
-\[
-R_{EE}(z)=1+z,\qquad z=h\lambda,
-\]
-and the negative-real stability interval is $[-2,0]$.
-Indeed, for $z\in\mathbb R_-$, the condition $|1+z|\leq1$ is equivalent to $-2\leq z\leq0$. This bounded interval means that a sufficiently large negative value of $h\lambda$ leaves the stability region, even if the step would otherwise appear adequate for resolving a slowly varying concentration. For Robertson, this is a local linearised restriction based on the Jacobian modes, not a theorem guaranteeing stability or instability of the full nonlinear trajectory.
-
 \subsection{Classical RK4}
 RK4 is
 \begin{align*}
@@ -18,7 +9,7 @@ For smooth $f$, local and global errors are $O(h^5)$ and $O(h^4)$; each step cos
 \[
 R_{RK4}(z)=1+z+\frac{z^2}{2}+\frac{z^3}{6}+\frac{z^4}{24}.
 \]
-Restricting the RK4 stability function to the negative real axis, the stability condition is $|R_{RK4}(z)|\leq1$. Solving the corresponding boundary equation gives the left endpoint of the negative-real stability interval at approximately $z=-2.7853$, so the interval is approximately $[-2.7853,0]$. Fourth-order accuracy describes how discretisation error decreases in the asymptotic regime; it does not make the bounded absolute-stability region larger without limit. Consequently, Robertson's rapidly decaying mode can restrict $h$ even when RK4 is already highly accurate on the slower components. Accuracy order and absolute stability answer different questions.
+RK4 remains subject to a bounded absolute-stability region despite its fourth-order accuracy. On the negative real axis, $|R_{RK4}(z)|\leq1$ gives a left endpoint of approximately $z=-2.7853$ and the interval $[-2.7853,0]$. Robertson's rapidly decaying mode can therefore restrict $h$ even when RK4 resolves the slower components accurately.
 
 \subsection{Implicit Euler and Newton iteration}
 Implicit Euler satisfies
@@ -30,4 +21,31 @@ and is first order. Defining $G(u)=u-y_n-hf(t_{n+1},u)$, Newton computes
 [I-hJ_f(t_{n+1},u^{(k)})]\Delta u^{(k)}&=-G(u^{(k)}),\\
 u^{(k+1)}&=u^{(k)}+\Delta u^{(k)}.
 \end{align*}
-The stability function $R_{IE}(z)=1/(1-z)$ contains the left half-plane. Thus implicit Euler is A-stable for the linear test equation, but stability alone does not guarantee sufficient accuracy at a large time step. Its practical performance also depends on the accuracy of the nonlinear solve and the computational cost of Newton iteration. In the reported implementation, Newton iteration starts from the explicit-Euler predictor $u^{(0)}=y_n+hf(t_n,y_n)$, uses the infinity norm of the nonlinear residual as its stopping measure, and permits at most 50 iterations. The standard uniform-step experiments use a residual tolerance of $10^{-12}$. The precise failed-step policy and any additional update-based stopping test remain to be confirmed from the final implementation.
+The stability function $R_{IE}(z)=1/(1-z)$ contains the left half-plane, so implicit Euler is A-stable for the linear test equation. This stability property does not control large-step accuracy, which also depends on the nonlinear solve. In our implementation, Newton iteration starts from the explicit-Euler predictor $u^{(0)}=y_n+hf(t_n,y_n)$, which reuses the derivative already stored at $t_n$ and therefore costs no extra evaluation. It uses the infinity norm of the nonlinear residual and permits at most 50 iterations. The standard uniform-step experiments use a residual tolerance of $10^{-12}$.
+
+\begin{algorithm}[H]
+\caption{Implicit Euler with Newton iteration}
+\label{alg:implicit-euler-newton}
+\begin{algorithmic}[1]
+\Require $y_n$, $t_n$, step size $h$, residual tolerance $\mathrm{tol}_N$, maximum iterations $k_{\max}$
+\Ensure accepted $y_{n+1}$ or a Newton-failure status
+\State $u^{(0)}\gets y_n+h f(t_n,y_n)$ \Comment{explicit-Euler predictor}
+\For{$k=0,1,\ldots,k_{\max}$}
+  \State $G^{(k)}\gets u^{(k)}-y_n-hf(t_n+h,u^{(k)})$
+  \If{$\|G^{(k)}\|_\infty\leq \mathrm{tol}_N$}
+    \State \Return $y_{n+1}\gets u^{(k)}$
+  \EndIf
+  \If{$k=k_{\max}$}
+    \State \Return Newton-failure status
+  \EndIf
+  \State $DG^{(k)}\gets I-hJ_f(t_n+h,u^{(k)})$
+  \State Solve $DG^{(k)}\Delta u^{(k)}=-G^{(k)}$
+  \State $u^{(k+1)}\gets u^{(k)}+\Delta u^{(k)}$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+Algorithm~\ref{alg:implicit-euler-newton} gives the Newton iteration used for each implicit Euler step. It starts from the explicit-Euler predictor and stops when the infinity norm of the nonlinear residual satisfies $\mathrm{tol}_N$. Our uniform-step runs use $k_{\max}=50$ and $\mathrm{tol}_N=10^{-12}$.
+
+The residual, rather than the Newton correction, is the right quantity to stop on for this problem: since $(1,1,1)^Tf\equiv0$, one step changes the invariant by exactly $(1,1,1)^TG(z)=\sum_iG_i(z)$, so $\|G\|_\infty$ bounds the invariant defect the step can introduce, while a tolerance on $\|\Delta u\|$ does not. The production runs use plain Newton without damping. A damped variant (backtracking on $\alpha$, halving from $\alpha=1$ with a strict-decrease test) is implemented for robustness but was not needed: across all reported uniform-step, sweep, and Newton-sweep runs there are no failed Newton steps. If a solve does fail, the run records the failure (non-finite residual, singular linear solve, stagnation, or iteration limit), recomputes the stored derivative so that the dense output belongs to the returned state, and continues; in fixed-step mode $h$ is not cut.
+
