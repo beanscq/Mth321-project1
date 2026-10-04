@@ -47,6 +47,7 @@ Including the structural zero would make $S$ undefined. The exactly degenerate i
 \end{figure}
 
 \subsection{Absolute stability and frozen bounds}
+\label{sec:frozen-bounds}
 The absolute-stability region is $\{z:|R(z)|\le1\}$. For explicit Euler this is the disk $|1+z|\le1$; RK4 has a bounded quartic region; implicit Euler includes the left half-plane because $|1/(1-z)|\le1$ there. These statements concern the linear test equation. Along the nonlinear Robertson trajectory, the eigenvalues of a frozen Jacobian provide local values of $z=h\lambda(t)$ and therefore a diagnostic of where stability restrictions may arise.
 
 \begin{figure}[H]
@@ -84,4 +85,3 @@ Thus a full-state pass implies an endpoint pass under the same absolute threshol
 \label{fig:diagnostics}
 \end{figure}
 The $2.1\times10^{-12}$ line records the difference between numerical reference solvers. It measures cross-solver agreement rather than the unknown true solution error, so differences below this level are reported without assigning additional significant digits.
-
