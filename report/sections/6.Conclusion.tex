@@ -9,6 +9,8 @@
 
 \paragraph{5. At library scale, the solver class dominates.} At $\mathrm{rtol}=10^{-6}$, all six \texttt{solve\_ivp} solvers reproduce $y_2(40)$ to better than $1.5\times10^{-11}$, yet the non-stiff solvers spend $1.4\times10^{5}$--$2.4\times10^{5}$ RHS evaluations where the stiff solvers spend $405$--$752$: BDF needs $535$ times fewer evaluations than RK45. This is the explicit stability restriction of conclusion 2 observed in production code, and it makes the choice of a stiff solver worth more than any tolerance tuning within a method class.
 
+\paragraph{6. A local stability cap improves adaptive RK4 when stability rather than accuracy limits the step.} At $10^{-8}$--$10^{-4}$, the cap removed all rejected trials and reduced RHS work by approximately $22$--$24\%$. At $10^{-10}$, it produced no practical benefit and only added spectral-evaluation overhead.
+
 \[
 \boxed{y_2(40)=9.185535\times10^{-6}}
 \]
