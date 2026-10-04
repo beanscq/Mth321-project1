@@ -51,7 +51,7 @@ The absolute-stability region is $\{z:|R(z)|\le1\}$. For explicit Euler this is 
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{F4_stability_regions.pdf}
-\caption{Absolute-stability regions with the Robertson spectrum $h\lambda(t)$ overlaid. The bounded EE and RK4 regions expose a local step-size restriction from the fast mode, whereas implicit Euler contains the left half-plane. The overlay predicts a relevant scale but does not establish nonlinear stability, accuracy, or concentration non-negativity.}
+\caption{Absolute-stability regions with the Robertson spectrum $h\lambda(t)$ overlaid. The bounded EE and RK4 regions expose a local step-size restriction from the fast mode, whereas implicit Euler contains the left half-plane. The overlay provides a local stability scale. Accuracy and non-negativity are evaluated separately in the numerical experiments.}
 \label{fig:regions}
 \end{figure}
 
@@ -60,7 +60,7 @@ At $t=40$, $|\lambda_{\rm fast}|=3392.79$, hence
 h_{EE}\lesssim\frac2{3392.79}=5.895\times10^{-4},\qquad
 h_{RK4}\lesssim\frac{2.7853}{3392.79}=8.209\times10^{-4}.
 \]
-The frozen bounds estimate the scale of the explicit step restriction. Their accuracy depends on the varying Jacobian and on the local eigenvalue description of the nonlinear system. The corresponding value $40/h$ is therefore a step-count estimate under the frozen-Jacobian condition.
+The frozen bounds estimate the explicit step-size scale along the trajectory. The empirical sweep in Section~5.2 tests this estimate against the nonlinear computation. The corresponding value $40/h$ is a step-count estimate under the frozen-Jacobian condition.
 
 The experiments evaluate absolute stability, numerical accuracy, and physical admissibility separately. Absolute stability concerns the linear test equation or a locally frozen linearisation, numerical accuracy concerns error relative to the reference trajectory, and physical admissibility includes non-negative concentrations. A method may remain stable while producing an inaccurate or negative solution.
 
@@ -72,7 +72,7 @@ y_{min}&=\min_{i,t\in\mathcal T}y_i(t),\\
 E_{global}&=\max_{t\in\mathcal T}\|y_h(t)-y_{ref}(t)\|_\infty,\\
 E_{end}&=|y_{2,h}(40)-y_{2,ref}(40)|.
 \end{align*}
-They provide different information, but they are not completely logically independent. Since $40\in\mathcal T$,
+The four diagnostics describe different properties of the solution. Since $40\in\mathcal T$,
 \[
 E_{end}\le E_{global}.
 \]
@@ -84,3 +84,4 @@ Thus a full-state pass implies an endpoint pass under the same absolute threshol
 \label{fig:diagnostics}
 \end{figure}
 The $2.1\times10^{-12}$ line records the difference between numerical reference solvers. It measures cross-solver agreement rather than the unknown true solution error, so differences below this level are reported without assigning additional significant digits.
+
