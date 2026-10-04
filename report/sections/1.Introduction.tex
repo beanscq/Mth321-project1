@@ -30,12 +30,12 @@ The Robertson system remains stiff after the visible spike in $B$ has passed. A 
 \end{figure}
 
 \subsection{Focus and report structure}
-This report focuses on five aspects: constructing a reference solution, analysing stiffness, comparing work at matched accuracy, evaluating numerical reliability, and studying Newton and adaptive tolerances. The remaining sections introduce the numerical methods and stability analysis before presenting the numerical experiments and conclusions.
+This report studies the Robertson problem through reference-solution validation, stiffness analysis, cost--accuracy comparison, and experiments on Newton and adaptive tolerances. The numerical methods are introduced first, followed by stability analysis and numerical experiments.
 
 \subsection{Scope of analysis}
-The report applies standard numerical methods to a strongly stiff chemical system. The analysis examines predictor acceptance inside the implicit solve by relating a local residual expansion to Newton corrections and trajectory error. A loose nonlinear tolerance can accept the explicit-Euler predictor without correction and change the update realised by the nominally implicit method.
+The report applies standard numerical methods to the stiff Robertson system. For implicit Euler, the Newton-tolerance experiment examines how predictor acceptance affects the computed update and trajectory error. A loose nonlinear tolerance can accept the explicit-Euler predictor without correction and change the update realised by the nominally implicit method.
 
-Numerical reliability requires separate checks of conservation, non-negativity, full-state error, and the endpoint error in $y_2(40)$. These diagnostics measure different properties of the computed trajectory. The explicit-Euler counterexample preserves the invariant near machine precision while producing negative concentrations and a large trajectory error.
+Numerical reliability is checked through conservation, non-negativity, full-state error, and the endpoint error in $y_2(40)$. Each diagnostic captures a different type of numerical failure. The explicit-Euler counterexample preserves the invariant near machine precision while producing negative concentrations and a large trajectory error.
 
 The adaptive study shows how the error norm changes acceptance behaviour, global error, and physical admissibility. Robertson concentrations occupy very different scales, so a small absolute error can still be large relative to the intermediate species. The comparison uses an unscaled absolute infinity norm and component-scaled mixed control over the tested parameter range.
 
@@ -46,7 +46,7 @@ The adaptive study shows how the error norm changes acceptance behaviour, global
 \label{tab:extensions}
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}p{0.34\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}@{}}
 \toprule
-Required element&Problem-specific extension&Numerical purpose\\
+Required element&Additional analysis&Numerical purpose\\
 \midrule
 Stability analysis&Frozen-Jacobian prediction combined with empirical step-size bracketing and separate tracking of negativity and divergence&Tests whether local linear stability predicts the relevant scale rather than an exact nonlinear boundary\\
 Implicit Euler&Predictor-acceptance and Newton-residual analysis&Shows how nonlinear stopping tolerance can change the realised update and expose explicit-like behaviour\\
@@ -56,6 +56,6 @@ Adaptive integration&Absolute-norm versus component-scaled error-control compari
 \end{tabular}
 \end{table}
 
-These experiments examine where standard stability, error, and admissibility checks give different information for a strongly stiff nonlinear system.
+The experiments compare stability, accuracy, and non-negativity because these criteria can give different conclusions for the same numerical run.
 
 The large separation of chemical time scales motivates the comparison of explicit and implicit time integrators. We therefore introduce their accuracy and linear-stability properties before applying trajectory-dependent Jacobian analysis to the Robertson system.
