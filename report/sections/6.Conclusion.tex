@@ -3,11 +3,13 @@
 
 \paragraph{2. Frozen-Jacobian analysis predicts the scale of explicit instability.} The estimate is local and the empirical sweep brackets the nonlinear transition. For EE, the $5.895\times10^{-4}$ estimate differs by about eight percent from the $5.4159\times10^{-4}$ largest stable tested step.
 
-\paragraph{3. Greater stability did not reduce matched-accuracy cost in the nominal model.} First-order IE requires more work than EE at every tested target reached by both methods. This result uses $C=N_f+N_J+N_{\mathrm{solve}}$ and remains subject to final verification of the operation counters.
+\paragraph{3. Greater stability did not reduce matched-accuracy cost in the nominal model.} First-order IE requires more work than EE at every tested target reached by both methods. This result uses the measured counters in $C=N_f+N_J+N_{\mathrm{solve}}$ under the equal-weight cost model.
 
-\paragraph{4. Solver tolerances change the realised numerical behaviour.} A loose Newton threshold can accept the explicit predictor, while an unscaled adaptive norm can admit physically invalid steps. Across the tested adaptive settings, mixed control completes all four runs without negative concentrations. Absolute $L^\infty$ control produces one inaccurate negative solution and one early termination. The accepted-state formula must still be checked in our final implementation.
+\paragraph{4. Solver tolerances change the realised numerical behaviour.} A loose Newton threshold can accept the explicit predictor, while an unscaled adaptive norm can admit physically invalid steps. Across the tested adaptive settings, mixed control completes all four runs without negative concentrations. Absolute $L^\infty$ control produces one inaccurate negative solution and one early termination.
 
-Subject to final reference-table confirmation,
+\paragraph{5. At library scale, the solver class dominates.} At $\mathrm{rtol}=10^{-6}$, all six \texttt{solve\_ivp} solvers reproduce $y_2(40)$ to better than $1.5\times10^{-11}$, yet the non-stiff solvers spend $1.4\times10^{5}$--$2.4\times10^{5}$ RHS evaluations where the stiff solvers spend $405$--$752$: BDF needs $535$ times fewer evaluations than RK45. This is the explicit stability restriction of conclusion 2 observed in production code, and it makes the choice of a stiff solver worth more than any tolerance tuning within a method class.
+
 \[
-\boxed{y_2(40)=9.185535\times10^{-6}}.
+\boxed{y_2(40)=9.185535\times10^{-6}}
 \]
+supported to ten significant digits by tolerance repetition and two independent cross-check solvers (Table~\ref{tab:ref-agreement}).
