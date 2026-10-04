@@ -1,1 +1,314 @@
+\section{Numerical Experiments}
+The numerical experiments compare convergence, stability, computational cost, Newton stopping tolerance, adaptive step-size control, and library solvers. Where relevant, stability, accuracy, and non-negativity are reported separately.
+\subsection{Uniform-step convergence}
+For sufficiently small step sizes, explicit Euler and implicit Euler are expected to approach first-order convergence, while classical RK4 is expected to approach fourth-order convergence.
+
+For $E(h)\approx Ch^p$,
+\[
+p_{obs}=\frac{\log(E(h)/E(h/2))}{\log2}.
+\]
+The uniform experiments use
+\[
+h\in\{10^{-3},5\times10^{-4},2.5\times10^{-4},
+1.25\times10^{-4},6.25\times10^{-5}\}.
+\]
+Fitting the late-time error over the selected small-$h$ fitting windows gives
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Method&Fitted order&Standard error&$R^2$&Levels used\\
+\midrule
+EE&1.078839&0.032755&0.998160&4\\
+RK4&4.267791&0.074278&0.999395&4\\
+IE&0.999955&0.000012&1.000000&5\\
+\bottomrule
+\end{tabular}
+\end{center}
+The fitted slopes approach the theoretical orders over the selected small-step ranges. The EE and RK4 fits use $6.25\times10^{-5}\le h\le5\times10^{-4}$, while the IE fit also includes $h=10^{-3}$. Stabilisation of the pairwise observed orders as $h$ decreases provides the operational indicator of asymptotic behaviour.
+
+The finite-range fitted orders include pre-asymptotic contributions from higher-order terms in the error expansion. If
+\[
+E(h)=C_p h^p+C_{p+1}h^{p+1}+\cdots,
+\]
+then a finite-range log--log fit can differ from $p$. The pairwise RK4 estimate moves toward $4.0231$ at the finest pair as the leading fourth-order term becomes more dominant; this observation does not determine the coefficients $C_p$ and $C_{p+1}$.
+
+The finest-pair orders provide the closest agreement with the formal orders. Their values are $0.9982$, $4.0231$, and $1.0000$ for EE, RK4, and IE, respectively, as the leading-order term becomes more dominant at smaller $h$. Stability, non-negativity, reference accuracy, floating-point effects, and common-grid interpolation are assessed separately from the fitted slope.
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F8_convergence.pdf}
+\caption{Formal versus observed convergence order. The selected small-$h$ fits support first-order EE and IE and fourth-order RK4, while finite-range deviations are consistent with pre-asymptotic contributions. Cubic-Hermite common-grid interpolation is retained as a possible secondary error source because its contribution was not isolated in a separate experiment.}
+\label{fig:convergence}
+\end{figure}
+The observed orders stabilise over the selected small-$h$ fitting range. This supports the formal orders without specifying a unique asymptotic threshold. Cubic-Hermite interpolation remains a secondary error source because its contribution was not isolated in a separate experiment.
+
+If cubic Hermite interpolation maps fixed-step output to $\mathcal T$, with $t=t_n+\theta h$,
+\begin{align*}
+H(t)=&(2\theta^3-3\theta^2+1)y_n+(\theta^3-2\theta^2+\theta)hf_n\\
+&+(-2\theta^3+3\theta^2)y_{n+1}+(\theta^3-\theta^2)hf_{n+1}.
+\end{align*}
+The common-grid comparison uses cubic-Hermite interpolation. No direct-grid or refined-output experiment isolates its contribution. The observed slopes therefore combine time-discretisation behaviour with any remaining interpolation effect.
+
+The fitted and pairwise observed orders support first-, fourth-, and first-order behaviour for EE, RK4, and IE, respectively. The remaining deviations at finite step sizes are consistent with pre-asymptotic contributions, while interpolation and reference effects remain possible secondary sources at the finest levels.
+
+\subsection{Empirical stability, negativity, and divergence}
+The frozen-Jacobian bounds are expected to predict the scale at which explicit stability problems emerge. The sweep tests nearby steps using separate stability, accuracy, and non-negativity diagnostics.
+
+The 22-point sweep reports:
+\begin{center}
+\begin{tabular}{lcc}\toprule
+&EE&RK4\\\midrule
+frozen estimate&$5.895\times10^{-4}$&$8.209\times10^{-4}$\\
+largest stable tested $h$&$5.4159\times10^{-4}$&$8.3088\times10^{-4}$\\
+first divergent tested $h$&$6.2464\times10^{-4}$&$9.5827\times10^{-4}$\\\bottomrule
+\end{tabular}
+\end{center}
+The observed transitions occur on the scale predicted by the frozen-Jacobian estimates. Differences between the estimated and observed values arise from the varying nonlinear Jacobian and the finite sampling of $h$. The 22-point sweep brackets the transition between adjacent tested steps, while arrival at $t=40$, boundedness, non-negativity, and accuracy remain separate outcomes.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F7_frozen_bound_vs_sweep.pdf}
+\caption{Does the frozen-Jacobian bound predict nonlinear failure? The observed transitions occur on the predicted scale but do not define an exact boundary. For EE at $h=6.2464\times10^{-4}$, negativity near $t=32.9$ precedes overflow near $t=39.7$, separating physical inadmissibility from divergence. The symbol $h_{\mathrm{crit}}$ in panel (c) is used only as shorthand for the sampled transition bracket; the 22-point sweep does not determine an exact nonlinear critical step size.}
+\label{fig:sweep}
+\end{figure}
+
+The empirical transitions occur on the scale predicted by the frozen-Jacobian estimate. Their mismatch with the estimated values shows that the local bound is not an exact nonlinear boundary.
+
+\subsection{Custom-method work--precision under a nominal operation-count model}
+Computational efficiency is compared at matched accuracy. The analysis admits only runs that meet the same error target and evaluates them under a stated accounting model.
+
+The larger stability region of implicit Euler may reduce the required number of time steps. The matched-accuracy comparison also includes its first-order discretisation error and nonlinear-solve cost.
+
+This operation-count comparison concerns the three controlled fixed-step implementations and is distinct from the later \texttt{nfev}-based benchmark of the six \texttt{solve\_ivp} solvers.
+
+We define a nominal equal-weight operation-count model as follows:
+\[
+C=N_f+N_J+N_{\mathrm{solve}}.
+\]
+The nominal cost model assigns one unit to each RHS evaluation, Jacobian evaluation, and linear solve. Equal weighting gives a common comparison index. Actual runtime also depends on matrix dimension, factorisation strategy, implementation, and reuse of computed quantities.
+
+The counters in $C$ are true runtime counters, not nominal per-step estimates. Each integrator accumulates $N_f$, $N_J$, and $N_{\mathrm{solve}}$ as it runs: explicit Euler adds one RHS evaluation per step, RK4 exactly four (a unit test asserts the count), and implicit Euler adds, per Newton iteration, one residual evaluation plus one Jacobian evaluation plus one linear solve, with the predictor costing nothing because it reuses the derivative stored at the previous node. The dense-output machinery adds zero RHS evaluations, so nothing is hidden in the interpolation. Not counted are the driver-loop overhead, the assembly of the analytic Jacobian, and I/O; wall time is reported separately and a sensitivity variant with weights $N_J=N_{\mathrm{solve}}=5$ is available. Because the counters are measured rather than assumed, an IE step whose predictor already satisfies the stopping rule is visibly cheaper (one RHS evaluation, zero Newton iterations), which is exactly the effect quantified in Section~5.4.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F12_work_precision.pdf}
+\caption{Does greater stability reduce work at matched accuracy? Horizontal cuts admit only runs meeting the same error target. Under the nominal equal-weight operation-count model and tested range, IE gains no cost advantage solely from its larger stability region; this is not a wall-clock or universal comparison.}
+\label{fig:work}
+\end{figure}
+
+IE requires more nominal work than EE at every tested target reached by both methods. The targets are $10^{-5}$, $3\times10^{-6}$, $10^{-6}$, and $10^{-7}$; under the equal-weight operation-count model, the ratio is about $2.0$--$3.7$, including $3.66$ at $10^{-6}$, and only RK4 reaches $10^{-7}$ in the swept range. This comparison uses the tested methods, error norm, step range, and nominal cost definition.
+
+Greater linear stability does not produce a cost advantage for IE in this matched-accuracy experiment. IE requires more nominal work wherever EE and IE both meet the target, under the equal-weight cost model and tested accuracy range.
+
+Operation count alone does not determine the behaviour of an implicit method, because its practical cost and accuracy also depend on how accurately the nonlinear equation is solved. The next experiment therefore separates the accuracy demanded of each Newton solve from the time-discretisation error of the trajectory.
+
+\subsection{Newton stopping tolerance}
+Tightening the Newton residual tolerance is expected to reduce algebraic error until time-discretisation error becomes dominant.
+
+For the explicit predictor $u_0=y_n+hf(y_n)$,
+\begin{align*}
+G(u_0)&=hf(y_n)-h\{f(y_n)+J_f(y_n)[u_0-y_n]+O(h^2)\}\\
+&=-h^2J_f(y_n)f(y_n)+O(h^3).
+\end{align*}
+Newton accepts the predictor without correction when its residual already satisfies the stopping tolerance. The effect of a zero-update step is assessed through the residual, step size, endpoint error, full-state error, and zero-update fraction.
+
+The nonlinear residual provides a computable surrogate for the algebraic solution error. Let $u^*$ denote the exact solution of the implicit equation $G(u^*)=0$. A local linearisation gives approximately
+\[
+u^{(k)}-u^*\approx [DG(u^*)]^{-1}G(u^{(k)}).
+\]
+Hence, locally and provided the linearisation is appropriate,
+\[
+\|u^{(k)}-u^*\|\lesssim \|[DG(u^*)]^{-1}\|\,\|G(u^{(k)})\|.
+\]
+The conditioning of $DG=I-hJ_f$ determines how the residual translates into state error. The Newton tolerance is therefore chosen to keep algebraic error below the time-discretisation error.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F10_newton_tolerance_sweep.pdf}
+\caption{Can conservation detect an under-solved implicit update? It remains small even when algebraic error matters, whereas trajectory error and zero-update fractions reveal that Newton tolerance can change the realised solver behaviour.}
+\label{fig:newtonsweep}
+\end{figure}
+The plot label ``recommended tol = $10^{-8}$'' denotes the representative tolerance tested in this experiment for the selected step sizes and error targets.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F14_newton_tolerance_switch.pdf}
+\caption{Can predictor acceptance change the realised update? Below the local, state-dependent threshold, the predictor may satisfy the stopping rule without correction and produce an explicit-like update; above it, further Newton iterations are generally required.}
+\label{fig:newtonswitch}
+\end{figure}
+
+The local estimate
+\[
+h^*\approx\sqrt{\frac{\mathrm{tol}_N}{\|J_ff\|_\infty}}
+\]
+depends on state, norm, predictor, and stopping rule. Along the reference trajectory at $t=1.0227$, the computed value is $\|J_ff\|_\infty=8.2324\times10^{-3}$. Table~\ref{tab:newton-endpoint} records the endpoint experiment under common time-discretisation settings.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Implicit-Euler endpoint results for three step sizes and two Newton residual tolerances. $E_{\rm end}$ is the absolute error in $y_2(40)$ and $E_{\rm global}$ is the full-state error. Newton iterations are counted as corrections, i.e.\ the number of Newton directions computed, which equals the number of Jacobian factorisations and linear solves; a step accepted at the predictor contributes zero.}
+\label{tab:newton-endpoint}
+\begin{tabular}{cccccc}
+\toprule
+$h$&$\mathrm{tol}_N$&$y_2(40)$&$E_{\rm end}$&$E_{\rm global}$&Newton iterations\\
+\midrule
+$10^{-3}$&$10^{-8}$ &$9.184039\times10^{-6}$&$1.496153\times10^{-9}$&$6.440338\times10^{-6}$&12482\\
+$10^{-3}$&$10^{-12}$&$9.185671\times10^{-6}$&$1.357640\times10^{-10}$&$7.354943\times10^{-6}$&40015\\
+$2.5\times10^{-4}$&$10^{-8}$ &$9.185501\times10^{-6}$&$3.390523\times10^{-11}$&$1.833620\times10^{-6}$&22\\
+$2.5\times10^{-4}$&$10^{-12}$&$9.185569\times10^{-6}$&$3.394197\times10^{-11}$&$1.838937\times10^{-6}$&160019\\
+$6.25\times10^{-5}$&$10^{-8}$ &$9.185526\times10^{-6}$&$8.481511\times10^{-12}$&$4.591584\times10^{-7}$&38\\
+$6.25\times10^{-5}$&$10^{-12}$&$9.185539\times10^{-6}$&$3.993830\times10^{-12}$&$4.597452\times10^{-7}$&267612\\
+\bottomrule
+\end{tabular}
+\end{table}
+Trajectory accuracy reaches a time-discretisation plateau once the nonlinear solve is sufficiently accurate. Table~\ref{tab:newton-endpoint} shows that tightening the tolerance does not uniformly reduce $E_{\rm global}$ at fixed $h$, although all six runs retain non-negative concentrations and report no failed Newton steps. The suitability of $10^{-8}$ therefore depends on the tested step sizes and error targets.
+
+A stricter nonlinear tolerance does not uniformly reduce $E_{\rm global}$ at fixed $h$. Time discretisation dominates once the nonlinear solve is sufficiently accurate over the tested step sizes and error targets.
+
+The smaller-step runs with the looser Newton tolerance report very few Newton corrections relative to the number of time steps. This pattern is consistent with frequent acceptance of the explicit-Euler predictor. Their accuracy and stability therefore depend on the update actually performed at each step.
+
+\subsection{Adaptive RK4 step doubling}
+After separating nonlinear-solver error from time-discretisation error in implicit Euler, we next examine a different source of algorithmic error: the norm used to control adaptive explicit integration.
+
+The Robertson components differ greatly in magnitude, so an unscaled absolute error norm may accept errors that are small in absolute terms but large relative to the intermediate species.
+
+Compare one full RK4 step with two half steps,
+\[
+e=y_{fine}-y_{whole}.
+\]
+For order four, the Richardson estimate $e/(2^4-1)=e/15$ approximates the local error of the coarser (full) step, and the implementation accepts the \emph{half-step} result $y_{\rm half}$, which is $16\times$ more accurate than the estimate suggests; the controller is therefore conservative by construction. The step is accepted when the scaled error indicator is at most $\mathrm{tol}$, and the next trial step is
+\[
+h_{\rm new}=h\cdot\mathrm{clip}\!\left(0.9\,(\mathrm{tol}/\eta)^{1/5},\,0.2,\,5\right),
+\]
+with controller exponent $1/(p+1)=1/5$ for $p=4$. The full parameter set of our final implementation is: Richardson division by $2^4-1$; accepted state $y_{\rm half}$ with nodes stored at $t+h/2$ and $t+h$; mixed norm
+$\eta=\max_i|e_i|/(\mathrm{atol\_ratio}_i+|y_i|)$ with $\mathrm{atol\_ratio}=(10^{-10},10^{-13},10^{-10})$, or the unscaled $\eta=\max_i|e_i|$ for the absolute variant; safety factor $0.9$; growth and shrink limits $5$ and $0.2$; $h_{\min}=10^{-12}$, $h_{\max}=5\times10^{-2}$; first step $h_0=10^{-6}$; a step budget of $3\times10^6$ attempts; and abort when $\max|y|>10^{3}$. A rejected attempt retries with the reduced step; if a Newton solve inside a trial fails, the trial is rejected and the step halved regardless of the error indicator, since an unconverged solve invalidates the estimate itself; a failure at $h_{\min}$ aborts the run. Each attempt costs 12 RHS evaluations (three RK4 steps of four evaluations each, one of them discarded with $y_{\rm full}$), and the cost model counts the attempt as $n_{\rm accepted}+n_{\rm rejected}$ attempts times 12.
+
+\begin{algorithm}[H]
+\caption{Adaptive RK4 with step doubling}
+\label{alg:adaptive-rk4}
+\begin{algorithmic}[1]
+\Require current $(t,y)$, trial step $h$, tolerance parameters, error norm, controller controls
+\Ensure accepted state and step statistics, or a controller-failure status
+\While{$t<T$}
+  \State $y_{\rm whole}\gets \operatorname{RK4Step}(t,y,h)$
+  \State $y_{\rm half}\gets \operatorname{RK4Step}(t,y,h/2)$
+  \State $y_{\rm fine}\gets \operatorname{RK4Step}(t+h/2,y_{\rm half},h/2)$
+  \State $e\gets (y_{\rm fine}-y_{\rm whole})/15$ \Comment{Richardson, $2^4-1$}
+  \State $\eta\gets \operatorname{ErrorIndicator}(e,y,y_{\rm fine},\text{tolerances},\text{norm})$
+  \If{$\eta\leq 1$}
+    \State $y\gets y_{\rm fine}$ \Comment{the half-step result is accepted}
+    \State $t\gets t+h$; record an accepted step
+  \Else
+    \State record a rejected step
+  \EndIf
+  \State $h\gets \operatorname{ControllerUpdate}(h,\eta,\text{controller controls})$
+  \If{the controller cannot produce an admissible retry}
+    \State \Return controller-failure status
+  \EndIf
+\EndWhile
+\State \Return $(t,y)$ and accepted/rejected-step statistics
+\end{algorithmic}
+\end{algorithm}
+
+Step doubling supplies a local error indicator by comparing two approximations over the same interval. Component scaling matters because the Robertson intermediate is much smaller than the other species. The local indicator controls step selection, while global accuracy also depends on accumulated error.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F11_adaptive_stepping.pdf}
+\caption{Does local error acceptance ensure a reliable trajectory? The norm changes controller behaviour: the absolute-norm runs give either negative concentrations with large global error or early termination, showing that local acceptance does not guarantee global accuracy or admissibility.}
+\label{fig:adaptive}
+\end{figure}
+The $2h_{\mathrm{frozen}}$ line is a substep-scale diagnostic because step doubling evaluates two half-steps of size $h/2$.
+
+The 5th--95th percentile band describes the deterministic error samples within each log-time bin. It is a descriptive envelope rather than a statistical confidence interval.
+
+The standard mixed scaling
+\[
+\max_i\frac{|e_i|}{\mathrm{atol}_i+\mathrm{rtol}|y_i|}\le1
+\]
+is not identical to $\max_i|e_i|/(\mathrm{atol}_i+|y_i|)\le\mathrm{tol}$ unless parameters are related explicitly. The component-scaled mixed controller completed all four tested runs and retained non-negative concentrations. Table~\ref{tab:adaptive-results} lists the quantitative results.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Adaptive RK4 step-doubling results. The two absolute-norm rows are distinct failure cases: the $10^{-6}$ run reaches $t=40$ but is inaccurate and negative, whereas the $10^{-4}$ run terminates early.}
+\label{tab:adaptive-results}
+\begin{tabular}{lrrrrrr}
+\toprule
+Norm&Tolerance&Accepted&Rejected&$E_{\rm global}$&Minimum component&RHS calls\\
+\midrule
+mixed&$10^{-10}$&31259&1&$3.2863\times10^{-14}$&$0$&375121\\
+mixed&$10^{-8}$ &22053&8317&$1.9874\times10^{-12}$&$0$&364441\\
+mixed&$10^{-6}$ &20772&9241&$9.9305\times10^{-9}$ &$0$&360157\\
+mixed&$10^{-4}$ &20745&8127&$3.2346\times10^{-7}$ &$0$&346465\\
+absolute $L^\infty$&$10^{-6}$&21669&6375&$7.8284\times10^{-3}$&$-4.7663\times10^{-5}$&336529\\
+absolute $L^\infty$&$10^{-4}$&1019&616&$2.1686\times10^{-3}$&$-9.0307\times10^{2}$&19633\\
+\bottomrule
+\end{tabular}
+\end{table}
+Stability controls much of the step selection in the successful mixed-norm runs. Their median RK4 half-step is approximately $1.061$--$1.074$ times the frozen RK4 bound at tolerances $10^{-8}$--$10^{-4}$, while the median normalised local error is $0.17$--$0.31$. Over these settings, mixed control reaches the final time without negative concentrations, whereas the two absolute-norm runs show large global error, negativity, or early termination. A fixed-versus-adaptive efficiency comparison requires a separate matched-global-error experiment and is left as future work.
+
+Local acceptance under the absolute norm coexists with large global error, negative concentrations, or early termination in these runs. Component-scaled control avoids these failures over the same tested settings. Efficiency is assessed separately from admissibility and accuracy.
+
+\subsection{Library-solver benchmark}
+The six \texttt{solve\_ivp} solvers were benchmarked under a common tolerance setting. RK45, RK23, and DOP853 represent explicit non-stiff methods, Radau and BDF represent stiff methods, and LSODA switches automatically between regimes. The primary performance metric is the number of right-hand-side evaluations (\texttt{nfev}), which is deterministic for five of the six solvers; wall time is machine-dependent and reported for context only. All six runs use $\mathrm{rtol}=10^{-6}$, $\mathrm{atol}=(10^{-10},10^{-12},10^{-10})$, no user Jacobian, and the same integration span; every solver reaches $t=40$ successfully. Since the stiff solvers build their own internal Jacobians, \texttt{nfev} alone understates their total work slightly; \texttt{njev}/\texttt{nlu} are not part of the recorded benchmark output, and this metric remains separate from the nominal operation counts in Section~5.3.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Six-solver \texttt{solve\_ivp} benchmark (SciPy 1.18.1). All solvers succeed; the endpoint error is the absolute difference against the reference $y_2(40)$. ``Speed-up'' is the ratio of \texttt{nfev} to the slowest solver.}
+\label{tab:shootout}
+\begin{tabular}{llrrrrr}
+\toprule
+Solver & Kind & \texttt{nfev} & Accepted steps & $y_2(40)$ & $E_{\rm end}$ & Speed-up\\
+\midrule
+RK45   & non-stiff & 241994 & 34541 & $9.185533\times10^{-6}$ & $1.78\times10^{-12}$ & $1.0\times$\\
+RK23   & non-stiff & 136730 & 45567 & $9.185549\times10^{-6}$ & $1.41\times10^{-11}$ & $1.8\times$\\
+DOP853 & non-stiff & 214706 & 17887 & $9.185535\times10^{-6}$ & $1.13\times10^{-13}$ & $1.1\times$\\
+Radau  & stiff     & 752    & 91    & $9.185535\times10^{-6}$ & $3.51\times10^{-14}$ & $322\times$\\
+BDF    & stiff     & 452    & 173   & $9.185545\times10^{-6}$ & $9.81\times10^{-12}$ & $535\times$\\
+LSODA  & auto      & 407    & 206   & $9.185529\times10^{-6}$ & $5.59\times10^{-12}$ & $595\times$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F16_solver_shootout.pdf}
+\caption{Non-stiff versus stiff \texttt{solve\_ivp} solvers at a common tolerance. Left: right-hand-side evaluations (\texttt{nfev}); right: wall-clock time. The non-stiff solvers cluster near $10^{5}$ evaluations, the stiff ones between $10^{2}$ and $10^{3}$.}
+\label{fig:shootout}
+\end{figure}
+
+The benchmark confirms the stability analysis at library scale. All six solvers reproduce $y_2(40)$ with an absolute error below $1.5\times10^{-11}$, yet the non-stiff solvers need $1.37\times10^{5}$--$2.42\times10^{5}$ RHS evaluations where the stiff solvers need $405$--$752$. BDF uses $535$ times fewer evaluations than RK45 and, on the test machine, about $128$ times less wall time ($11.2$ ms versus $1433.8$ ms). This is the same explicit stability restriction measured in Section~5.2, now seen through production solvers: an explicit method cannot take the steps the slow trajectory seems to invite, while an implicit method is free to follow the solution timescale. For a stiff problem, the choice of a stiff solver is worth several orders of magnitude; tuning tolerances within a method class is not.
+
+\subsection{Jacobian verification}
+A correct analytic Jacobian should agree with a centered finite-difference approximation over an intermediate perturbation range. Large perturbations reveal truncation error, small perturbations reveal round-off error, and a deliberately incorrect Jacobian should be detected when the state activates the corresponding nonlinear reaction terms.
+
+For coordinate direction $e_j$, the implemented centered finite-difference approximation is
+\[
+(J_{\rm FD})_{:,j}
+=\frac{f(y+\varepsilon e_j)-f(y-\varepsilon e_j)}{2\varepsilon}.
+\]
+With $J_A$ denoting the analytic Jacobian, the normalised matrix discrepancy is
+\[
+\eta(\varepsilon)
+=\frac{\|J_A-J_{\rm FD}\|_\infty}
+{\max(1,\|J_A\|_\infty)}.
+\]
+
+\begin{figure}[H]
+\centering\includegraphics[width=\textwidth]{F15_jacobian_check.pdf}
+\caption{Verification of the analytic Jacobian using centered finite differences and a directional-derivative check. The U-shaped discrepancy reflects the competition between $O(\varepsilon^2)$ centered-difference truncation error and $O(\varepsilon_{\rm mach}/\varepsilon)$ floating-point cancellation. The mass left-null check supplies an additional structural test, while differentiating by columns also helps detect an accidental Jacobian transpose.}
+\label{fig:jaccheck}
+\end{figure}
+The figure contains a legacy $O(\varepsilon)$ truncation annotation. The implemented centered formula has leading error $O(\varepsilon^2)$, so the analysis uses the model $O(\varepsilon^2)+O(\varepsilon_{\rm mach}/\varepsilon)$.
+
+The centered finite-difference discrepancy has competing truncation and round-off contributions. The leading terms are $O(\varepsilon^2)$ and $O(\varepsilon_{\rm mach}/\varepsilon)$, where $\varepsilon$ is the perturbation and $\varepsilon_{\rm mach}$ is machine precision. Their balance produces the observed U-shaped curve as $\varepsilon$ decreases.
+
+The U-shaped discrepancy matches the expected balance between $O(\varepsilon^2)$ truncation and $O(\varepsilon_{\rm mach}/\varepsilon)$ cancellation. The coefficient-deletion test is detected only when the state activates the relevant nonlinear terms, so the check uses an intermediate perturbation scale and dynamically informative states.
+
+\subsection{Limitations and Scope}
+The stability conclusions describe local behaviour along the reference trajectory. They use frozen-Jacobian eigenvalues and the sampled step sweep, rather than a nonlinear stability theorem.
+
+The accuracy conclusions use a numerical reference trajectory. Agreement among Radau, BDF, and LSODA measures cross-solver consistency, while the unknown error relative to the exact solution remains unbounded by that comparison.
+
+The cost conclusions use the nominal operation count $C=N_f+N_J+N_{\mathrm{solve}}$ with measured counters. They apply to the tested methods and accuracy targets, not to wall-clock performance.
+
+The Newton and adaptive conclusions use the tested tolerances and controller settings. The mixed-norm results establish admissibility only for the tested runs.
+
+The convergence study uses cubic-Hermite interpolation on the common grid. No direct-grid or refined-output experiment isolates its contribution, so interpolation remains a secondary error source in the observed slopes.
+
+Two extensions would strengthen the work but are left as future work: a fixed-versus-adaptive comparison at matched global error, which would complete the work--precision picture of Section~5.5, and a stability-aware adaptive RK4 whose controller respects the frozen-Jacobian bound, which would turn the diagnostic of Section~3.3 into a design rule.
 
