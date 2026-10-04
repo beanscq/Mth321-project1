@@ -1,5 +1,8 @@
 \section{Reference Solution and Validation}
-The local analysis above supplies predictions that must be tested against a trustworthy numerical baseline. We therefore construct and cross-check a high-accuracy reference trajectory before using it to measure convergence, stability failures, and endpoint error.
+The numerical experiments use a cross-checked reference trajectory for error comparison. It is used to measure convergence, stability failure, and endpoint error.
+
+The numerical error has three main sources in this study: time discretisation, the nonlinear algebraic solve, and floating-point round-off. The Robertson equations are treated as the prescribed mathematical model, so modelling error relative to real chemistry is outside the scope. The algebraic and round-off components should remain below the time-discretisation error when measuring formal convergence. Step refinement, Newton-residual studies, and finite-difference checks are used to compare these error sources.
+
 The common comparison grid contains $t=0$ and 200 logarithmically spaced output points from $10^{-8}$ to $40$, for 201 points in total. Internal steps are method-specific. The reference trajectory is computed with Radau using
 \[
 \mathrm{rtol}=10^{-10},\qquad
@@ -10,10 +13,45 @@ and repeated after reducing both tolerances by a factor of 100:
 \mathrm{rtol}=10^{-12},\qquad
 \mathrm{atol}=(10^{-16},10^{-22},10^{-16}).
 \]
-It is also cross-checked against BDF and LSODA~\cite{scipy}. A Jacobian identity checks algebra but is not an independent proof of trajectory accuracy.
+BDF and LSODA provide independent numerical cross-checks of the reference trajectory~\cite{scipy}. The Jacobian identity separately checks the algebraic structure of the model.
 
-The tolerance repetition gives $10.75875$ agreeing digits, while the BDF and LSODA comparisons give $10.70288$ and $10.98101$ digits, respectively. The largest componentwise difference among the reference comparisons is $2.088996\times10^{-12}$. The reference trajectory has maximum invariant defect $2.442491\times10^{-15}$, remains non-negative, and gives $y_{2,\max}=3.648707\times10^{-5}$ at $t=4.420102\times10^{-3}$. These agreements are strong numerical evidence, not mathematical proof. A final solver-by-solver endpoint table still requires the individual raw outputs. The reported endpoint is
+The reference computations agree closely across tolerance refinement and solver choice. Table~\ref{tab:ref-endpoints} lists the endpoints of all four runs, and Table~\ref{tab:ref-agreement} summarises their agreement. The repeated Radau runs agree to $10.75875$ digits (minimum over components), BDF to $10.70288$ digits, and LSODA to $10.98101$ digits; the largest componentwise cross-check difference is $2.089\times10^{-12}$, and no pairwise difference on the common grid exceeds $3.8\times10^{-12}$. These differences measure agreement among the numerical references rather than a bound on the unknown true error.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Endpoints of the four reference runs at $t=40$ on the common grid. ``Tightened'' repeats the baseline Radau run with both tolerances reduced by a factor of 100.}
+\label{tab:ref-endpoints}
+\begin{tabular}{llcccc}
+\toprule
+Run & Solver & rtol & $y_1(40)$ & $y_2(40)$ & $y_3(40)$\\
+\midrule
+baseline  & Radau & $10^{-10}$ & 0.715827068719404 & $9.18553476458\times10^{-6}$ & 0.284163745745831\\
+tightened & Radau & $10^{-12}$ & 0.715827068719404 & $9.18553476458\times10^{-6}$ & 0.284163745745830\\
+cross-check & BDF   & $10^{-12}$ & 0.715827068723178 & $9.18553476470\times10^{-6}$ & 0.284163745742058\\
+cross-check & LSODA & $10^{-12}$ & 0.715827068722376 & $9.18553476467\times10^{-6}$ & 0.284163745742861\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Agreement of the reference runs. ``Max $|\Delta y|$'' is the largest componentwise absolute difference between the two trajectories over the common grid; digits are the minimum agreeing digits over the three components. The tolerance repeat is limited by the slowly converging $y_2$ component; $y_1$ and $y_3$ agree to about 11 digits.}
+\label{tab:ref-agreement}
+\begin{tabular}{lcc}
+\toprule
+Comparison & Max $|\Delta y|$ & Agreeing digits (min)\\
+\midrule
+Radau tight vs.\ tightened & $2.089\times10^{-12}$ & 10.759\\
+Baseline vs.\ BDF          & $3.774\times10^{-12}$ & 10.703\\
+Baseline vs.\ LSODA        & $2.972\times10^{-12}$ & 10.981\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The reference trajectory satisfies the expected non-negativity and conservation conditions on the comparison grid: its maximum invariant defect is $2.442491\times10^{-15}$ and all concentrations remain non-negative. Because the endpoint is reproduced to $10.76$ digits by tolerance repetition and to at least $10.70$ digits by two structurally different solvers, $y_2(40)$ supports ten significant digits. We therefore report
 \[
 y_2(40)=9.185535\times10^{-6},
 \]
-subject to final confirmation of its supported significant digits.
+conservative by four digits relative to the confirmed agreement.
