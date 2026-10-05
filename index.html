@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Robertson ODE · Q&A 自测卡</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1b1f24; --muted:#5d6a76;
+  --line:#e2e6ea; --blue:#1f5fa8; --amber:#b7791f; --green:#1a7f5a; --red:#b1483f;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",
+  "Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+  line-height:1.6;font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:22px;margin:0 0 6px;letter-spacing:.2px}
+.sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+.sub b{color:var(--blue)}
+.bar{position:sticky;top:0;z-index:9;background:rgba(246,247,249,.94);
+  backdrop-filter:saturate(150%) blur(6px);border-bottom:1px solid var(--line);
+  padding:10px 0 9px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:13px;padding:6px 12px;border-radius:999px;
+  border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+button:hover{border-color:#c8cfd6}
+button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.count{color:var(--muted);font-size:12.5px;margin-left:auto}
+h2.sec{font-size:14px;letter-spacing:.06em;color:var(--blue);
+  margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  margin:9px 0;overflow:hidden;transition:border-color .15s}
+.card:hover{border-color:#ced6dd}
+.head{display:flex;gap:10px;align-items:flex-start;padding:12px 13px;cursor:pointer}
+.num{flex:none;font-size:11.5px;font-weight:700;color:#fff;background:var(--blue);
+  border-radius:5px;padding:2px 7px;margin-top:2px;letter-spacing:.03em}
+.num.must{background:var(--amber)}
+.q{flex:1;min-width:0}
+.q .en{font-weight:600}
+.q .zh{color:var(--muted);font-size:13px;margin-top:2px}
+.q .pg{color:var(--muted);font-size:11.5px;margin-top:3px;letter-spacing:.02em}
+.body{display:none;padding:0 13px 13px 13px;border-top:1px dashed var(--line)}
+.card.open .body{display:block}
+.ans{background:#f3f7fb;border-left:3px solid var(--blue);border-radius:0 7px 7px 0;
+  padding:10px 12px;margin:12px 0 0}
+.ans strong{color:var(--blue)}
+.zh{color:#39424b;margin-top:9px;font-size:13.8px}
+.zh b{color:var(--ink);font-weight:600}
+.note{margin-top:9px;font-size:13px;color:var(--amber);background:#fdf8ee;
+  border-left:3px solid var(--amber);border-radius:0 7px 7px 0;padding:8px 11px}
+.note strong{color:var(--amber)}
+.err{margin-top:9px;font-size:13px;color:var(--red);background:#fdf1f0;
+  border-left:3px solid var(--red);border-radius:0 7px 7px 0;padding:8px 11px}
+.err strong{color:var(--red)}
+.tip{color:var(--muted);font-size:12.5px;text-align:center;margin:14px 0 0}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0;
+  background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#eef2f6;font-size:12.5px;color:#39424b;letter-spacing:.02em}
+tr:last-child td{border-bottom:none}
+ol{margin:8px 0;padding-left:22px}
+ol li{margin:6px 0}
+ol li strong{color:var(--blue)}
+.hide{display:none}
+@media print{
+  .bar{display:none}.body{display:block !important}
+  .card{break-inside:avoid;border-color:#bbb}
+  body{background:#fff}
+}
+</style></head><body><div class="wrap">
+<h1>Robertson 刚性 ODE · Q&amp;A 自测卡</h1>
+<p class="sub">点题看答案 ｜ 共 <b><span id="total">0</span></b> 题 ｜
+现在显示 <b><span id="shown">40</span></b> 题 ｜
+<span style="color:#b7791f">橙色编号</span> = 必背</p>
+<div class="bar">
+  <button id="f-all" class="on">全部题目</button>
+  <button id="f-must">只看必背 ⭐</button>
+  <button id="open-all">展开全部</button>
+  <button id="close-all">收起全部</button>
+</div>
+<h2 class="sec">A. 模型细节（Model）</h2>
+<div class="card" data-must="1"><div class="head"><span class="num must">M1</span><div class="q"><div class="en">What is the Robertson problem?</div><div class="zh">这是什么问题？</div><div class="pg">点开看答案 · P2</div></div></div><div class="body"><div class="ans">It is a <strong>1966 stiff benchmark</strong>: <strong>three species</strong> A, B and C <strong>interconvert through three reactions</strong>, and the <strong>rate constants span 0.04 to 3×10⁷</strong>. We start from <strong>y(0) = (1, 0, 0)</strong> and solve on <strong>t in [0, 40]</strong> seconds.</div><div class="zh">1966 年的刚性基准题：三个物种经三个反应互相转化，速率常数从 0.04 跨到 3×10⁷；初值 (1,0,0)，在 t∈[0,40] 上求解。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">M2</span><div class="q"><div class="en">Which reactions? Write the model.</div><div class="zh">What are the three reactions?（三个反应是什么？）</div><div class="pg">点开看答案 · P2</div></div></div><div class="body"><div class="ans"><strong>A goes to B</strong> (k₁ = 0.04), <strong>B plus B gives B plus C</strong> (k₂ = 3×10⁷), and <strong>B plus C gives A plus C</strong> (k₃ = 1×10⁴). By the <strong>law of mass action</strong>, each rate is <strong>rate constant × product of reactant concentrations</strong>, so <strong>y₁′ = −r₁ + r₃</strong>, <strong>y₂′ = +r₁ − r₂ − r₃</strong>, <strong>y₃′ = +r₂</strong>.</div><div class="zh">A→B、B+B→B+C、B+C→A+C；按质量作用定律，速率 = 速率常数 × 反应物浓度之积，于是三条方程如左。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">M3</span><div class="q"><div class="en">Is this a linear system?</div><div class="zh">Is the system linear?（是线性系统吗？）</div><div class="pg">点开看答案 · P2、P7</div></div></div><div class="body"><div class="ans">No, it is <strong>nonlinear</strong>: the rates contain <strong>y₂ squared</strong> and <strong>y₂ times y₃</strong>. That is exactly why an implicit step can no longer be solved by hand and needs <strong>Newton's method</strong>.</div><div class="zh">不是。速率里有 y₂² 和 y₂y₃；正因如此隐式步不能直接解，必须用 Newton 迭代。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">M4</span><div class="q"><div class="en">Why is y₁+y₂+y₃ always exactly 1?</div><div class="zh">Why is the total concentration conserved?（总浓度为什么守恒？）</div><div class="pg">点开看答案 · P2、P4、P11</div></div></div><div class="body"><div class="ans"><strong>Add the three equations</strong> and <strong>every term cancels in pairs</strong> — r₁ against r₁, r₂ against r₂, r₃ against r₃ — so <strong>d/dt(y₁+y₂+y₃) = 0</strong>, and from <strong>(1,0,0)</strong> we always have <strong>y₁+y₂+y₃ = 1</strong>. In the Jacobian language, <strong>(1,1,1)ᵀJ = 0</strong>: the system has <strong>one structural zero eigenvalue</strong>.</div><div class="zh">三式相加逐项抵消，总和恒定（恒为 1）。用 Jacobian 说就是 (1,1,1)ᵀJ=0，含一个结构零特征值。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">M5</span><div class="q"><div class="en">Over what interval, and is it autonomous?</div><div class="zh">What time interval? Does f depend on t?（时间区间？f 显含 t 吗？）</div><div class="pg">点开看答案 · P2</div></div></div><div class="body"><div class="ans"><strong>t from 0 to 40</strong> seconds. The system is <strong>autonomous</strong>: the right-hand side depends on the state <strong>y</strong> only; <strong>t</strong> just sits in the argument for the solver's convenience.</div><div class="zh">0 到 40 秒。系统自治，右端只依赖状态 y。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">M6</span><div class="q"><div class="en">Why does B peak so early?</div><div class="zh">Why does B peak at t ≈ 0.004 s?（B 为什么这么早到峰？）</div><div class="pg">点开看答案 · P3</div></div></div><div class="body"><div class="ans"><strong>B jumps up from essentially zero</strong>, but the moment it appears, <strong>k₂ = 3×10⁷</strong> consumes it as <strong>y₂²</strong> — the faster it builds, the faster it burns. So B <strong>peaks at t ≈ 0.004 s</strong> at only <strong>3.65×10⁻⁵</strong>, then <strong>decays fast</strong>.</div><div class="zh">B 一旦生成就被 k₂ 以 y₂² 的速率迅速消耗，越堆越烧，所以峰很早、很低（3.65×10⁻⁵ @ t≈0.004 s），随后快速衰减。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">M7</span><div class="q"><div class="en">Why are A and C slow, and why is y₂(40) so small?</div><div class="zh">Why do A and C move slowly? Why is y₂(40) so tiny?（A、C 为什么慢？终点 B 为什么这么小？）</div><div class="pg">点开看答案 · P3</div></div></div><div class="body"><div class="ans">After the initial spike, <strong>B is consumed as fast as it is produced</strong>, so the remaining motion is controlled by the slow feed <strong>k₁ = 0.04</strong>: <strong>A slides from 1 down to 0.72</strong> and <strong>C rises from 0 to 0.28</strong> on a <strong>tens-of-seconds</strong> timescale, <strong>which has nothing to do with B</strong>. So at t = 40 only <strong>9.2×10⁻⁶</strong> of B is left.</div><div class="zh">快瞬态过后，B 生成多快就被消耗多快，剩下的变化由慢速率 k₁=0.04 控制：A 从 1→0.72、C 从 0→0.28，时间尺度是几十秒，与 B 无关；t=40 时 B 只剩 9.2×10⁻⁶。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">M8</span><div class="q"><div class="en">What has to be handed in?</div><div class="zh">What do you hand in?（要交什么？）</div><div class="pg">点开看答案 · P2、P3、P15</div></div></div><div class="body"><div class="ans"><strong>Three things</strong>: the <strong>three concentration curves</strong> y₁(t), y₂(t), y₃(t); <strong>one specific number, y₂(40)</strong>; and an explanation of <strong>why this number can be believed</strong>.</div><div class="zh">三件：三条浓度曲线、一个数 y₂(40)、以及"为什么这个数可信"的说明。</div></div></div>
+
+<h2 class="sec">B. 刚性 &amp; ODE 基础（Stiffness）</h2>
+<div class="card" data-must="1"><div class="head"><span class="num must">S1</span><div class="q"><div class="en">What does "stiff" mean?</div><div class="zh">What does stiffness mean in this problem?（这题里"刚性"指什么？）</div><div class="pg">点开看答案 · P4</div></div></div><div class="body"><div class="ans"><strong>One very fast process and one very slow process standing side by side, with a large gap between them.</strong> The fast world has to be computed <strong>together with</strong> the slow one, and <strong>that is the annoying part</strong>.</div><div class="zh">一个极快的过程和一个极慢的过程并存、差距很大；快的部分必须和慢的一起算，这就是麻烦所在。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">S2</span><div class="q"><div class="en">How do you measure stiffness?</div><div class="zh">How do you measure "stiff"?（怎么量化刚度？）</div><div class="pg">点开看答案 · P4</div></div></div><div class="body"><div class="ans">By the <strong>two speeds of the system</strong>: they are the <strong>eigenvalues of the Jacobian</strong>, and a mode decays at speed <strong>|Re λ|</strong>. At <strong>t = 40</strong> we get <strong>λ = −3392.79</strong> (a clock of <strong>2.95×10⁻⁴ s</strong>) and <strong>λ = −0.0214</strong> (<strong>46.7 s</strong>), so the <strong>stiffness ratio</strong> is <strong>S = 1.58×10⁵</strong>.</div><div class="zh">用系统的两个速度衡量：即 Jacobian 的特征值，模式按 |Re λ| 衰减。t=40 时 λ=−3392.79（时钟 2.95e-4 s）与 −0.0214（46.7 s），比值 S=1.58e5。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">S3</span><div class="q"><div class="en">Why do you need the Jacobian?</div><div class="zh">为什么要用雅可比？（Why the Jacobian?）</div><div class="pg">点开看答案 · P7、P4</div></div></div><div class="body"><div class="ans">Give the state a small perturbation <strong>δ</strong>: <strong>f(y+δ) = f(y) + J(y)δ + O(δ²)</strong>, so <strong>δ′ = J(y)δ</strong> and each mode decays like <strong>e^{λt}</strong>. The Jacobian, <strong>J(y) = ∂f/∂y</strong>, is what turns "how fast" into algebra.</div><div class="zh">给状态一个扰动 δ，展开得 δ′=J(y)δ，模式按 e^{λt} 衰减；雅可比 J=∂f/∂y 把"多快"变成可算的东西。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">S4</span><div class="q"><div class="en">Why is one eigenvalue exactly zero?</div><div class="zh">One eigenvalue is zero — why?（为什么有一个零特征值？）</div><div class="pg">点开看答案 · P4</div></div></div><div class="body"><div class="ans">Because <strong>adding the three columns of J gives (1,1,1)ᵀJ = 0</strong>: moving along the direction <strong>(1,1,1)</strong> changes nothing, since that direction is exactly <strong>conservation</strong>. So <strong>one mode is a structural zero</strong>, and the two <strong>live</strong> speeds come from the <strong>reduced 2×2 Jacobian</strong>.</div><div class="zh">因为 J 的三列相加为零，沿 (1,1,1)（守恒方向）不变，所以有一个结构零特征值；两个"活"的速度来自降阶的 2×2 雅可比。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">S5</span><div class="q"><div class="en">What is the test equation? What is a stability region?</div><div class="zh"></div><div class="pg">点开看答案 · P5</div></div></div><div class="body"><div class="ans"><strong>y′ = λy</strong>. One step of a method <strong>multiplies y by a factor R(z)</strong> with <strong>z = hλ</strong>, and the step is <strong>safe wherever |R(z)| ≤ 1</strong>. On the negative real axis, <strong>explicit Euler is safe to z = −2</strong>, <strong>RK4 to z ≈ −2.79</strong>, <strong>implicit Euler everywhere</strong>.</div><div class="zh">y′=λy。一步相当于把 y 乘以 R(z)（z=hλ），|R(z)|≤1 就是安全区。负实轴上 EE 到 −2，RK4 到 −2.79，隐式 Euler 全覆盖。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">S6</span><div class="q"><div class="en">Is there a limit on the step size?</div><div class="zh">Do you have a step-size limit?（步长有上限吗？）</div><div class="pg">点开看答案 · P5</div></div></div><div class="body"><div class="ans">Yes — every explicit method has a <strong>step ceiling</strong>, and it comes from the <strong>fastest eigenvalue of this problem</strong>, <strong>|λ| = 3392.79 s⁻¹</strong> at t = 40, times each method's <strong>real-axis edge</strong>: <strong>Explicit Euler 5.9×10⁻⁴ s</strong> (2 ÷ 3392.79) and <strong>RK4 8.2×10⁻⁴ s</strong> (2.79 ÷ 3392.79). <strong>Implicit Euler has none.</strong></div><div class="zh">有。天花板由最快特征值 |λ|=3392.79（t=40）与方法的负实轴边界决定：EE 5.9e-4 s、RK4 8.2e-4 s；隐式 Euler 没有。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">S7</span><div class="q"><div class="en">What happens if the step is too large?</div><div class="zh">What if the step is too big?（步长太大会怎样？）</div><div class="pg">点开看答案 · P5、P11</div></div></div><div class="body"><div class="ans">If the step is too large, <strong>the error is amplified at every step</strong>, and the solution <strong>collapses</strong>: at <strong>Explicit Euler with step 3×10⁻³</strong> the concentration reads <strong>−921.8</strong>, which is <strong>chemically unacceptable</strong>.</div><div class="zh">误差每步被放大，解崩溃：EE h=3e-3 时浓度读到 −921.8，化学上不可接受。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">S8</span><div class="q"><div class="en">What does that ceiling cost you?</div><div class="zh">What does the ceiling cost you?（这个上限的代价是什么？）</div><div class="pg">点开看答案 · P5</div></div></div><div class="body"><div class="ans">With a ceiling of <strong>5.9×10⁻⁴ s</strong>, covering <strong>40 seconds takes at least 6.8×10⁴ steps</strong> — that is just 40 divided by the ceiling. In practice <strong>you need even more</strong>.</div><div class="zh">上限 5.9e-4 s，40 秒至少要 6.8e4 步（就是 40 除以上限）；实际只会更多。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">S9</span><div class="q"><div class="en">Is stability the same as accuracy?</div><div class="zh">稳定等于准确吗？</div><div class="pg">点开看答案 · P11</div></div></div><div class="body"><div class="ans">No. <strong>Stability decides whether you can keep going; accuracy decides whether the answer is right.</strong> The clearest example: a run with <strong>conservation 1.1×10⁻¹³ — it looks perfect — yet min concentration −921.8 and error 1.08×10¹⁰</strong>.</div><div class="zh">不是。稳定性管"能不能算下去"，精度管"算得对不对"。反例：守恒 1.1e-13 看着完美，但 min y = −921.8、误差 1.08e10。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">S10</span><div class="q"><div class="en">Can the step be relaxed halfway?</div><div class="zh">Can you use a big step in the easy part?（后半段能不能放大步长？）</div><div class="pg">点开看答案 · P5、P10</div></div></div><div class="body"><div class="ans">No — <strong>the ceiling is set by the fastest process, and the fastest is at t = 40, the very end of the run</strong>, so it <strong>binds for the whole integration</strong>. The sweep confirms it: the <strong>first step that dies</strong> is only about 15% above the largest stable one.</div><div class="zh">不能。上限由最快的过程决定，而它恰好在 t=40（全程末尾）最大，所以整段计算都被卡住；实测也证实：崩掉的步长只比跑通的大 15% 左右。</div></div></div>
+
+<h2 class="sec">C. 方法 &amp; 数值基础（Methods）</h2>
+<div class="card" data-must="1"><div class="head"><span class="num must">N1</span><div class="q"><div class="en">What is the difference between the two Euler methods?</div><div class="zh">Explicit vs implicit Euler?（显式与隐式欧拉的区别？）</div><div class="pg">点开看答案 · P7</div></div></div><div class="body"><div class="ans"><strong>Explicit Euler only looks at now</strong>: <strong>y_{n+1} = y_n + h f(t_n, y_n)</strong> — <strong>one evaluation</strong>, then <strong>walk straight along the tangent</strong>. <strong>Implicit Euler looks ahead</strong>: <strong>y_{n+1} = y_n + h f(t_{n+1}, y_{n+1})</strong> — the unknown sits <strong>on both sides</strong>, so <strong>every step solves an equation</strong>.</div><div class="zh">显式只用当前斜率、一次求值、沿切线走直线；隐式未知量在两边，每步都要解方程。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">N2</span><div class="q"><div class="en">How does RK4 work?</div><div class="zh">How does RK4 take a step?（RK4 怎么走一步？）</div><div class="pg">点开看答案 · P7</div></div></div><div class="body"><div class="ans"><strong>RK4 samples the step before committing</strong>: <strong>four slopes</strong> — <strong>left end, midpoint twice, right end</strong> — and takes a weighted average, <strong>y_{n+1} = y_n + h(k₁+2k₂+2k₃+k₄)/6</strong>. That is <strong>four evaluations per step</strong>, in exchange for <strong>4th-order accuracy</strong>.</div><div class="zh">RK4 用四个斜率（左端、两次中点、右端）加权平均；每步 4 次求值换来 4 阶精度。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">N3</span><div class="q"><div class="en">Do your methods really have the right order?</div><div class="zh">How do you check the order?（阶数怎么验证？）</div><div class="pg">点开看答案 · P8</div></div></div><div class="body"><div class="ans">We do not <strong>claim</strong> the order, we <strong>measure it from the fit</strong>: on a <strong>log–log plot</strong> a p-th-order method is a <strong>straight line of slope p</strong>. Measured: <strong>Explicit Euler 1.08</strong>, <strong>RK4 4.27</strong>, <strong>Implicit Euler 1.00</strong> — <strong>all three match the textbook</strong>, so the implementations are <strong>correct</strong>.</div><div class="zh">不声称而是测量：log-log 图上 p 阶方法是一条斜率为 p 的直线。测得 1.08 / 4.27 / 1.00，与教科书一致，说明实现正确。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">N4</span><div class="q"><div class="en">Why does one implicit step cost more?</div><div class="zh">Why is an implicit step more expensive?（隐式一步为什么更贵？）</div><div class="pg">点开看答案 · P7、P13</div></div></div><div class="body"><div class="ans">Because every step <strong>solves a nonlinear system</strong>, by <strong>Newton's method</strong>: each correction costs <strong>one f, one Jacobian and one solve</strong>. So <strong>each step costs about 3× more</strong> than explicit Euler — the trade is that the step itself <strong>may be much larger</strong>.</div><div class="zh">每步要解非线性方程组（Newton）：每次迭代花 1 次 f、1 次雅可比、1 次求解，单步约贵 3 倍；换来的是步长可以大得多。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">N5</span><div class="q"><div class="en">Can you explain Newton's method in your solver?</div><div class="zh">What does Newton's method do here?（Newton 迭代怎么做？）</div><div class="pg">点开看答案 · P7、P13</div></div></div><div class="body"><div class="ans">Every step must <strong>solve an equation</strong>, because the rates are <strong>nonlinear</strong> (y₂² and y₂y₃), so the unknown sits <strong>on both sides</strong>. Newton fixes a first guess step by step until both sides agree, and each correction costs <strong>one f, one Jacobian, one solve</strong> — that is why <strong>an implicit step costs about 3× an explicit one</strong>.</div><div class="zh">速率是非线性的（y₂²、y₂y₃），未知量出现在等式两边，所以每步要解方程；Newton 从一个初猜出发逐次修正直到两边一致，每次修正花 1 次 f、1 次雅可比、1 次求解 —— 所以隐式一步约是显式的 3 倍成本。</div><div class="note">追问：If he asks “what equation exactly?” — the step condition $y_{n+1}=y_n+h\,f(y_{n+1})$ itself: keep guessing $y_{n+1}$ until both sides agree. （PPT 上说到「每次迭代就是解一个 3×3 的线性方程组」为止，<strong>不写迭代公式，也不要展开</strong>。）</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">N6</span><div class="q"><div class="en">Why did you write the Jacobian by hand?</div><div class="zh">Why an analytic Jacobian?（为什么手写解析雅可比？）</div><div class="pg">点开看答案 · P4、P13</div></div></div><div class="body"><div class="ans">Two reasons: <strong>implicit Euler needs it</strong> — Newton solves the step equation with the Jacobian — and our integrators <strong>count Jacobian calls</strong> as part of the cost. The analytic form is exact and only a few lines.</div><div class="zh">两个原因：隐式 Euler 的 Newton 迭代需要雅可比；而且我们的积分器把雅可比调用也计进成本。解析形式精确，代码也只有几行。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">N8</span><div class="q"><div class="en">What are rtol and atol?</div><div class="zh">两个容差是什么？</div><div class="pg">点开看答案 · P14</div></div></div><div class="body"><div class="ans"><strong>rtol</strong> is the <strong>relative</strong> tolerance and <strong>atol</strong> the <strong>absolute</strong> one; the solver keeps its estimated error below them. Our stiff run uses <strong>rtol = 1e−6</strong>, and every solver in the comparison ran <strong>at the same tolerance</strong>, so the comparison is fair.</div><div class="zh">rtol 是相对容差、atol 是绝对容差；我们的刚性求解用 rtol=1e-6，图里所有求解器都在同一容差下跑，比较才公平。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">N9</span><div class="q"><div class="en">What solver did you use for the reference? And what is nfev?</div><div class="zh">什么求解器？nfev 是什么？</div><div class="pg">点开看答案 · P6、P14</div></div></div><div class="body"><div class="ans">Two <strong>stiff solvers</strong>, <strong>BDF</strong> and <strong>Radau</strong>, are cross-checked against each other. <strong>nfev</strong> means the number of <strong>function evaluations</strong> — how many times the solver called the right-hand side — which is a fair way to compare work.</div><div class="zh">用两个刚性求解器 BDF 和 Radau 互相校验；nfev = 右端求值次数，是公平的工作量度量。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">N10</span><div class="q"><div class="en">Since implicit takes big steps, is it cheaper?</div><div class="zh">隐式更省吗？（Is implicit cheaper?）</div><div class="pg">点开看答案 · P12</div></div></div><div class="body"><div class="ans"><strong>Implicit is steadier, but not cheaper.</strong> At an error of <strong>10⁻⁶</strong>, <strong>Explicit Euler costs 3.0, RK4 3.2, and Implicit Euler 11</strong> — implicit Euler is <strong>only 1st order</strong>, so it must take very small steps, each 3× the cost. <strong>Stability buys a bigger step, not accuracy.</strong></div><div class="zh">不更省。目标误差 1e-6 时 EE 3.0、RK4 3.2、IE 11——IE 只有 1 阶，必须取很小的步，每步又贵 3 倍。稳定性买到的是"更大的步"，不是"更高的精度"。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">N11</span><div class="q"><div class="en">Which method would you pick for a problem like this?</div><div class="zh">你会选哪个方法？为什么？</div><div class="pg">点开看答案 · P14</div></div></div><div class="body"><div class="ans">For a <strong>stiff problem</strong>, use an <strong>implicit (stiff) solver</strong> — that is our rule of thumb. Among the three textbook methods, <strong>RK4 is the best value</strong> here: it matches implicit at 10⁻⁶ for cost, but it is <strong>4th order</strong>, and it is the only one that reaches <strong>10⁻⁷</strong>.</div><div class="zh">刚性题就用隐式（刚性）求解器；三个方法里 RK4 最划算——与隐式同价位但 4 阶，还是唯一能做到 1e-7 的。</div></div></div>
+
+<h2 class="sec">D. 验证 &amp; 结果（Verification &amp; results）</h2>
+<div class="card" data-must="1"><div class="head"><span class="num must">R1</span><div class="q"><div class="en">How do you know the reference is right?</div><div class="zh">参考解凭什么可信？</div><div class="pg">点开看答案 · P6</div></div></div><div class="body"><div class="ans">We <strong>tighten the tolerance until the digits stop changing</strong>, and only quote the digits that survive; then we <strong>cross-check against two off-the-shelf stiff solvers, BDF and Radau</strong>. Independent implementations agreeing is what makes the reference trustworthy.</div><div class="zh">反复调紧容差直到数字不再变，只引用活下来的位数；再跟两个现成的刚性求解器 BDF、Radau 交叉对照 —— 独立实现彼此吻合，参考解才可信。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">R2</span><div class="q"><div class="en">What are the checks?</div><div class="zh">你做了哪些检查？</div><div class="pg">点开看答案 · P9</div></div></div><div class="body"><div class="ans"><strong>Three checks plus the endpoint</strong>, <strong>one failure each</strong>: <strong>Conservation</strong> — whether <strong>y₁+y₂+y₃ stays at 1</strong>; <strong>Non-negativity</strong> — whether <strong>a concentration ever goes negative</strong>; <strong>Accuracy</strong> — <strong>point-by-point against the reference</strong>; and the fourth card, <strong>Endpoint</strong> — whether <strong>y₂(40) matches</strong>. <strong>The first three checks are mutually independent</strong>, and the nastiest combination is <strong>"the first two pass, the third is way off"</strong>.</div><div class="zh">三道检查加终点值，各管一种失效：守恒、非负、精度（逐点比对）、终点值。前三道相互独立，最坏组合是"前两道过、第三道差得远"。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">R3</span><div class="q"><div class="en">Then why keep the conservation check?</div><div class="zh">守恒检查还有意义吗？</div><div class="pg">点开看答案 · P11</div></div></div><div class="body"><div class="ans">It <strong>cannot fail</strong>: <strong>add the three equations</strong> and <strong>the terms cancel in pairs</strong>, so <strong>every method keeps it automatically</strong>, good run or bad. The <strong>10⁻¹³</strong> in the plot is just the computer's <strong>rounding error</strong> — <strong>this check can never fail</strong>, and the other two are the checks that can.</div><div class="zh">它不可能失败：三式相加逐项抵消，任何方法都自动保持。图里那个 1e-13 只是舍入误差——这道检查永远不会不及格，能抓错的是另外两道。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">R4</span><div class="q"><div class="en">What is the most striking single run?</div><div class="zh">最扎眼的一次运行是？</div><div class="pg">点开看答案 · P11</div></div></div><div class="body"><div class="ans"><strong>Explicit Euler at step 3×10⁻³</strong>: <strong>conservation 1.1×10⁻¹³ — it looks perfect — yet min concentration −921.8 and error 1.08×10¹⁰</strong>. <strong>Checking conservation alone would have waved this through</strong> — so <strong>surviving is not correct</strong>.</div><div class="zh">EE 取 h=3e-3：守恒 1.1e-13 看着完美，但 min y=−921.8、误差 1.08e10。只看守恒就会放它过——"活着"不等于"正确"。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">R5</span><div class="q"><div class="en">What number do you hand in?</div><div class="zh">要交的数是多少？</div><div class="pg">点开看答案 · P6、P15</div></div></div><div class="body"><div class="ans"><strong>y₂(40) = 9.185535×10⁻⁶</strong>, safe to quote <strong>to 10 digits</strong>. We also report the <strong>peak 3.65×10⁻⁵ at t ≈ 0.004 s</strong>, because it is <strong>4 times larger</strong> than the endpoint.</div><div class="zh">y₂(40)=9.185535e-6，可报 10 位有效数字；同时报峰值 3.65e-5（t≈0.004 s），它比终点大 4 倍。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">R6</span><div class="q"><div class="en">How big is the stiff vs non-stiff difference?</div><div class="zh">刚性和非刚性差多少？</div><div class="pg">点开看答案 · P14</div></div></div><div class="body"><div class="ans">At <strong>the same tolerance</strong>, the explicit solvers needed <strong>241,994 evaluations for RK45</strong> and 214,706 for DOP853, while the implicit ones needed only <strong>752 for Radau and 452 for BDF</strong> — <strong>about 500× fewer evaluations</strong>, and about <strong>100× in wall-clock time</strong>. <strong>All four give the same y₂(40).</strong></div><div class="zh">同一容差下，显式的 RK45 要 241,994 次求值、DOP853 要 214,706 次；隐式的 Radau 只要 752 次、BDF 452 次 —— 求值次数少约 500 倍，按运行时间约 100 倍；四个求解器算出的 y₂(40) 一模一样。</div><div class="note">追问（口径）：PPT 标题写的是 <strong>100×</strong>（按时间的大致口径），图上是<strong>求值次数</strong>，比值约 <strong>530×</strong>。若老师追问精确值，<strong>先确认他问的是时间还是次数</strong>，再给对应的数。</div></div></div>
+<div class="card" data-must="1"><div class="head"><span class="num must">R7</span><div class="q"><div class="en">Why are the non-stiff solvers so slow?</div><div class="zh">非刚性为什么这么慢？</div><div class="pg">点开看答案 · P14</div></div></div><div class="body"><div class="ans"><strong>Stability forces every explicit step below 10⁻⁴ s</strong>, so <strong>40 seconds takes hundreds of thousands of steps</strong>; an <strong>implicit method has no such limit</strong>. So the <strong>rule of thumb: for a stiff problem, use an implicit (stiff) solver.</strong></div><div class="zh">稳定性把每个显式步压在 1e-4 s 以下，40 秒就要几十万步；隐式没有这个限制。口诀：刚性题用隐式求解器。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">R8</span><div class="q"><div class="en">Can you reproduce all these numbers?</div><div class="zh">这些数能复现吗？</div><div class="pg">点开看答案 · 报告内容（PPT 已不单列这一页）</div></div></div><div class="body"><div class="ans">Yes: <strong>every number in the report is produced by our own code</strong> — <strong>not a single number is typed by hand</strong>. SciPy is used <strong>only for the reference cross-check</strong>; <strong>EE / RK4 / IE and Newton are all implemented by us</strong>, each under 20 lines.</div><div class="zh">可以。报告里每个数字都由我们自己的代码产出，没有一个数字是手敲的；SciPy 只用于参考解交叉校验，EE/RK4/IE 与 Newton 全部自己实现，每段不到 20 行。</div></div></div>
+
+<h2 class="sec">E. 开放题 &amp; 收尾（Open）</h2>
+<div class="card" data-must="0"><div class="head"><span class="num">O1</span><div class="q"><div class="en">What is the main lesson?</div><div class="zh">这个项目你学到什么？</div><div class="pg">点开看答案 · P15</div></div></div><div class="body"><div class="ans">Three things: check accuracy <strong>point-by-point, never by conservation</strong>; for a <strong>stiff problem, use a stiff solver</strong>; and <strong>be careful with tolerances</strong>, because a <strong>loose tolerance quietly changes the method</strong>.</div><div class="zh">三点：精度要逐点比、不能靠守恒；刚性题用刚性求解器；容差要小心，松容差会悄悄改变方法本身。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">O2</span><div class="q"><div class="en">What are the limitations?</div><div class="zh">有什么局限？</div><div class="pg">点开看答案 · P10、P15</div></div></div><div class="body"><div class="ans">The stability bound is a <strong>diagnostic, not a theorem</strong>: we predicted <strong>5.90×10⁻⁴</strong> and the largest step that survived was <strong>5.42×10⁻⁴</strong> — <strong>8% apart</strong>, good enough to guide, not to prove. And our cost model is <strong>counting</strong>: one f, one Jacobian, one solve, each worth <strong>1</strong>.</div><div class="zh">稳定性界是判据不是定理：预测 5.90 vs 实测 5.42，差 8%，够指导但不构成证明；成本模型是计数的近似。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">O3</span><div class="q"><div class="en">Why is this problem a benchmark?</div><div class="zh">为什么这题是基准题？</div><div class="pg">点开看答案 · P2</div></div></div><div class="body"><div class="ans">Because it is <strong>small but hard</strong>: only <strong>three species and three reactions</strong>, yet <strong>nonlinear</strong> and with a <strong>stiffness ratio of 1.58×10⁵</strong> — and because there is a <strong>known reference answer</strong>, any method can be checked against it.</div><div class="zh">因为它小但难：三个物种、三个反应，非线性，刚度比 1.58e5；且有公认参考解，任何方法都能拿来对照。</div></div></div>
+<div class="card" data-must="0"><div class="head"><span class="num">O4</span><div class="q"><div class="en">If he does ask about code</div><div class="zh">Show me the code / how is the model coded?</div><div class="pg">点开看答案 · P2、P4</div></div></div><div class="body"><div class="ans"><strong>The model is just the three reactions written as f(t, y)</strong> — on the slide we show that f, and the <strong>Jacobian</strong> it implies on page 4. Explicit Euler, RK4, Implicit Euler and Newton are <strong>written by us</strong>, each under 20 lines; <strong>the reference comes from the off-the-shelf stiff solvers BDF and Radau</strong>, and <strong>every figure comes out of this code</strong>.</div><div class="zh">模型就是三条反应写成 f(t,y)（PPT 第 2 页给出方程，第 4 页给出它对应的雅可比）；EE/RK4/IE 与 Newton 都是我们自己写的，每段不到 20 行；参考解来自 SciPy 的 BDF 与 Radau，所有图都出自这段代码。</div></div></div>
+<h2 class="sec tail">救场句（Q&amp;A 专用，背下来）</h2>
+<table>
+<tr><th>情况</th><th>说这句</th></tr>
+<tr><td>没听清</td><td><strong>“Sorry, could you repeat the question a bit more slowly?”</strong></td></tr>
+<tr><td>想确认问题</td><td><strong>“Do you mean … ?”</strong></td></tr>
+<tr><td>完全不会</td><td><strong>“That is a good question. Let me check the data and come back to it.”</strong></td></tr>
+<tr><td>答到一半卡住</td><td><strong>“Let me put it in one sentence.”</strong>（然后念该页标题）</td></tr>
+<tr><td>收尾 / 抢时间</td><td><strong>“That is exactly what conclusion 2 shows.”</strong>（把问题交回 PPT）</td></tr>
+</table>
+<p>---</p>
+<h2 class="sec tail">红线（这几句话绝对不要说错）</h2>
+<ol>
+<li>❌ “<strong>Implicit is cheaper.</strong>” → ✅ <strong>Implicit is steadier, but not cheaper.</strong></li>
+<li>❌ “<strong>Conservation passed, so the answer is right.</strong>” → ✅ <strong>This check can never fail; only point-by-point comparison bites.</strong></li>
+<li>❌ “<strong>Higher order means a bigger allowed step.</strong>” → ✅ For explicit methods the ceiling comes from <strong>stability</strong> (the fastest eigenvalue), <strong>not from the order</strong>; RK4's ceiling is only slightly larger (2.79 vs 2.00).</li>
+<li>❌ “<strong>The stiff solver is 530× faster.</strong>” → ✅ Say <strong>about 100×</strong> (as on the slide); if asked to be precise, state the basis — <strong>time ≈ 110×</strong>, <strong>evaluations ≈ 530×</strong>.</li>
+<li>❌ “<strong>RK4 is implicit</strong> / <strong>BDF is explicit</strong>.” → ✅ RK4 is explicit; BDF is a stiff (implicit) solver.</li>
+<li>❌ “<strong>λ is positive / the system is unstable.</strong>” → ✅ <strong>Both eigenvalues are negative</strong>, so every mode decays.</li>
+<li>❌ 现场心算（如 2 ÷ 3392.79）。 → ✅ 直接报 <strong>the ceiling is 5.9×10⁻⁴ s</strong>。</li>
+</ol>
+<p>---</p>
+<h2 class="sec tail">数字怎么念（Q&amp;A 常用）</h2>
+<table>
+<tr><th>屏幕上</th><th>念成</th></tr>
+<tr><td>0.04 / 3×10⁷ / 1×10⁴</td><td>zero point zero four / three times ten to the seven / one times ten to the four</td></tr>
+<tr><td>1.58×10⁵</td><td>one point five eight times ten to the five</td></tr>
+<tr><td>5.9×10⁻⁴ / 8.2×10⁻⁴</td><td>five point nine / eight point two times ten to the minus four</td></tr>
+<tr><td>3392.79</td><td>three thousand three hundred ninety-two point seven nine</td></tr>
+<tr><td>3.65×10⁻⁵</td><td>three point six five times ten to the minus five</td></tr>
+<tr><td>9.185535×10⁻⁶</td><td>nine point one eight five three five times ten to the minus six</td></tr>
+<tr><td>1.1×10⁻¹³</td><td>one point one times ten to the minus thirteen</td></tr>
+<tr><td>1.08×10¹⁰</td><td>one point zero eight times ten to the ten</td></tr>
+<tr><td>241,994 / 452</td><td>two hundred forty-one thousand nine hundred ninety-four / four hundred fifty-two</td></tr>
+<tr><td>y₂(40)</td><td><strong>y two at forty</strong></td></tr>
+<tr><td>nfev</td><td><strong>N-F-E-V</strong></td></tr>
+<tr><td>BDF / RK45 / DOP853</td><td><strong>B-D-F</strong> / <strong>R-K-four-five</strong> / <strong>D-O-P-eight-five-three</strong></td></tr>
+</table>
+<p class="tip">先自己出声答一遍，再点开对答案 —— 加粗的词就是 PPT 上的原词。</p>
+</div><script>
+var cards = [].slice.call(document.querySelectorAll('.card'));
+var secs  = [].slice.call(document.querySelectorAll('h2.sec:not(.tail)'));
+function q(id){ return document.getElementById(id); }
+q('total').textContent = cards.length;
+cards.forEach(function(c){
+  c.querySelector('.head').addEventListener('click', function(){ c.classList.toggle('open'); });
+});
+function visCount(){
+  q('shown').textContent = cards.filter(function(c){ return !c.classList.contains('hide'); }).length;
+}
+q('f-all').addEventListener('click', function(){
+  q('f-all').classList.add('on'); q('f-must').classList.remove('on');
+  cards.forEach(function(c){ c.classList.remove('hide'); });
+  secs.forEach(function(h){ h.classList.remove('hide'); });
+  visCount();
+});
+q('f-must').addEventListener('click', function(){
+  q('f-must').classList.add('on'); q('f-all').classList.remove('on');
+  cards.forEach(function(c){ c.classList.toggle('hide', c.dataset.must !== '1'); });
+  secs.forEach(function(h){
+    var s = h.nextElementSibling, any = false;
+    while (s && s.classList.contains('card')) {
+      if (!s.classList.contains('hide')) any = true;
+      s = s.nextElementSibling;
+    }
+    h.classList.toggle('hide', !any);
+  });
+  visCount();
+});
+q('open-all').addEventListener('click', function(){
+  cards.forEach(function(c){ c.classList.add('open'); });
+});
+q('close-all').addEventListener('click', function(){
+  cards.forEach(function(c){ c.classList.remove('open'); });
+});
+</script></body></html>
